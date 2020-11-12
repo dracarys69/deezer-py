@@ -1,6 +1,9 @@
 # deezer-py
 A wrapper for all Deezer's APIs
 
+## Installing and using the library
+You can install this library with `pip install deezer-py`
+
 # License
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
