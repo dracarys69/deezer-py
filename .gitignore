@@ -1,0 +1,14 @@
+__pycache__
+*/__pycache__
+
+.DS_Store
+
+# local env files
+/env/
+/venv/
+.env.local
+.env.*.local
+
+#build files
+/build
+/dist
