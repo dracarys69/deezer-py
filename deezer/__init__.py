@@ -3,6 +3,8 @@ requests = eventlet.import_patched('requests')
 from deezer.gw import GW
 from deezer.api import API
 
+__version__ = "0.0.1"
+
 class TrackFormats():
     """Number associtation for formats"""
     FLAC    = 9
