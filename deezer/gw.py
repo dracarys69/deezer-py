@@ -282,8 +282,8 @@ class GW:
             body = self.get_track(sng_id)
         return body
 
-    def get_user_playlists(self, user_id):
-        user_profile_page = self.get_user_profile_page(user_id, 'playlists', limit=-1)
+    def get_user_playlists(self, user_id, limit=25):
+        user_profile_page = self.get_user_profile_page(user_id, 'playlists', limit=limit)
         blog_name = user_profile_page['DATA']['USER'].get('BLOG_NAME', "Unkown")
         data = user_profile_page['TAB']['playlists']['data']
         result = []
@@ -291,22 +291,22 @@ class GW:
             result.append(map_user_playlist(playlist, blog_name))
         return result
 
-    def get_user_albums(self, user_id):
-        data = self.get_user_profile_page(user_id, 'albums', limit=-1)['TAB']['albums']['data']
+    def get_user_albums(self, user_id, limit=25):
+        data = self.get_user_profile_page(user_id, 'albums', limit=limit)['TAB']['albums']['data']
         result = []
         for album in data:
             result.append(map_user_album(album))
         return result
 
-    def get_user_artists(self, user_id):
-        data = self.get_user_profile_page(user_id, 'artists', limit=-1)['TAB']['artists']['data']
+    def get_user_artists(self, user_id, limit=25):
+        data = self.get_user_profile_page(user_id, 'artists', limit=limit)['TAB']['artists']['data']
         result = []
         for artist in data:
             result.append(map_user_artist(artist))
         return result
 
-    def get_user_tracks(self, user_id):
-        data = self.get_user_profile_page(user_id, 'loved', limit=-1)['TAB']['loved']['data']
+    def get_user_tracks(self, user_id, limit=25):
+        data = self.get_user_profile_page(user_id, 'loved', limit=limit)['TAB']['loved']['data']
         result = []
         for track in data:
             result.append(map_user_track(track))
