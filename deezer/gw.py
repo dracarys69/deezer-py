@@ -1,6 +1,7 @@
 import eventlet
 requests = eventlet.import_patched('requests')
 
+import json
 from deezer.utils import map_artist_album
 
 class LyricsStatus():
@@ -212,6 +213,16 @@ class GW:
             })
         }
         return self.api_call('page.get', params=params)
+
+    def search(self, query, index=0, limit=10, suggest=True, artist_suggest=True, top_tracks=True):
+        return self.api_call('deezer.pageSearch', {
+                    "query": query,
+                    "start": index,
+                    "nb": limit,
+                    "suggest": suggest,
+                    "artist_suggest": artist_suggest,
+                    "top_tracks": top_tracks
+                })
 
     # Extra calls
 

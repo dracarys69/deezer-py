@@ -1,3 +1,5 @@
+import re
+
 RELEASE_TYPE = {0:"single", 1:"album", 2:"compile", 3:"ep", 4:"bundle"}
 
 # maps gw-light api user/tracks to standard api
@@ -185,3 +187,13 @@ def map_playlist(playlist):
             },
             'type': "playlist"
         }
+
+# Cleanup terms that can hurt search results
+def clean_search_query(term):
+    term = str(term)
+    term = re.sub(r' feat[\.]? ', " ", term)
+    term = re.sub(r' ft[\.]? ', " ", term)
+    term = re.sub(r'\(feat[\.]? ', " ", term)
+    term = re.sub(r'\(ft[\.]? ', " ", term)
+    term = term.replace('&', " ").replace('–', "-").replace('—', "-")
+    return term
