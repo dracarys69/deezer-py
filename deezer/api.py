@@ -216,15 +216,15 @@ class API:
 
     def search_radio(self, query, strict=False, order=None, index=0, limit=25):
         args = self._generate_search_args(query, strict, order, index, limit)
-        return self.api_call('search/playlist', radio)
+        return self.api_call('search/radio', args)
 
     def search_track(self, query, strict=False, order=None, index=0, limit=25):
         args = self._generate_search_args(query, strict, order, index, limit)
-        return self.api_call('search/track', radio)
+        return self.api_call('search/track', args)
 
     def search_user(self, query, strict=False, order=None, index=0, limit=25):
         args = self._generate_search_args(query, strict, order, index, limit)
-        return self.api_call('search/user', radio)
+        return self.api_call('search/user', args)
 
     def get_track(self, song_id):
         return self.api_call(f'track/{str(song_id)}')
