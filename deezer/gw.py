@@ -283,10 +283,12 @@ class GW:
         return body
 
     def get_user_playlists(self, user_id):
-        data = self.get_user_profile_page(user_id, 'playlists', limit=-1)['TAB']['playlists']['data']
+        user_profile_page = self.get_user_profile_page(user_id, 'playlists', limit=-1)
+        blog_name = user_profile_page['DATA']['USER'].get('BLOG_NAME', "Unkown")
+        data = user_profile_page['TAB']['playlists']['data']
         result = []
         for playlist in data:
-            result.append(map_user_playlist(playlist))
+            result.append(map_user_playlist(playlist, blog_name))
         return result
 
     def get_user_albums(self, user_id):

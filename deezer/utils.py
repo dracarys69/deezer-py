@@ -78,7 +78,7 @@ def map_user_album(album):
     }
 
 # maps gw-light api user/playlists to standard api
-def map_user_playlist(playlist):
+def map_user_playlist(playlist, default_user_name=""):
     return {
         'id': playlist['PLAYLIST_ID'],
         'title': playlist['TITLE'],
@@ -92,7 +92,7 @@ def map_user_playlist(playlist):
         'tracklist': 'https://api.deezer.com/playlist/'+str(playlist['PLAYLIST_ID'])+'/tracks',
         'creator': {
             'id': playlist['PARENT_USER_ID'],
-            'name': playlist['PARENT_USERNAME'] if 'PARENT_USERNAME' in playlist else self.user['name']
+            'name': playlist.get('PARENT_USERNAME', default_user_name)
         },
         'type': 'playlist'
     }

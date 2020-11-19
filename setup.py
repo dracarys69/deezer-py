@@ -7,7 +7,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="deezer-py",
-    version="0.0.7",
+    version="0.0.8",
     description="A wrapper for all Deezer's APIs",
     long_description=README,
     long_description_content_type="text/markdown",
