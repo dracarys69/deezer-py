@@ -265,7 +265,7 @@ class API:
     # Extra calls
 
     def get_countries_charts(self):
-        temp = self.get_user_playlists('637006841')
+        temp = self.get_user_playlists('637006841', limit=-1)['data']
         result = sorted(temp, key=lambda k: k['title']) # Sort all playlists
         if not result[0]['title'].startswith('Top'): result = result[1:] # Remove loved tracks playlist
         return result

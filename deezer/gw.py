@@ -220,7 +220,7 @@ class GW:
         releases = []
         result = {'all': []}
         ids = []
-        
+
         # Get all releases
         while True:
             response = self.get_artist_discography(art_id, index=index, limit=limit)
@@ -252,6 +252,21 @@ class GW:
                         result['more'].append(obj)
                         result['all'].append(obj)
         return result
+
+    def get_track_with_fallback(self, sng_id):
+        body = None
+        if int(sng_id) > 0:
+            try:
+                body = self.get_track_page(sng_id)
+            except:
+                pass
+        if body:
+            if 'LYRICS' in body:
+                body['DATA']['LYRICS'] = body['LYRICS']
+            body = body['DATA']
+        else:
+            body = self.get_track(sng_id)
+        return body
 
 class APIError(Exception):
     """Base class for Deezer exceptions"""

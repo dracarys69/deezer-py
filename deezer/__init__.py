@@ -4,7 +4,7 @@ from deezer.gw import GW
 from deezer.api import API
 import json
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 class TrackFormats():
     """Number associtation for formats"""
