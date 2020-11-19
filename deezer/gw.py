@@ -1,6 +1,8 @@
 import eventlet
 requests = eventlet.import_patched('requests')
 
+from deezer.utils import map_artist_album
+
 class LyricsStatus():
     """Explicit Content Lyrics"""
 
@@ -210,6 +212,46 @@ class GW:
             })
         }
         return self.api_call('page.get', params=params)
+
+    # Extra calls
+
+    def get_artist_discography_tabs(self, art_id, limit=100):
+        index = 0
+        releases = []
+        result = {'all': []}
+        ids = []
+        
+        # Get all releases
+        while True:
+            response = self.get_artist_discography(art_id, index=index, limit=limit)
+            releases += response['data']
+            index += limit
+            if index > response['total']:
+                break
+
+        for release in releases:
+            if release['ALB_ID'] not in ids:
+                ids.append(release['ALB_ID'])
+                obj = map_artist_album(release)
+                if (release['ART_ID'] == art_id or release['ART_ID'] != art_id and release['ROLE_ID'] == 0) and release['ARTISTS_ALBUMS_IS_OFFICIAL']:
+                    # Handle all base record types
+                    if not obj['record_type'] in result:
+                        result[obj['record_type']] = []
+                    result[obj['record_type']].append(obj)
+                    result['all'].append(obj)
+                else:
+                    # Handle albums where the artist is featured
+                    if release['ROLE_ID'] == 5:
+                        if not 'featured' in result:
+                            result['featured'] = []
+                        result['featured'].append(obj)
+                    # Handle "more" albums
+                    elif release['ROLE_ID'] == 0:
+                        if not 'more' in result:
+                            result['more'] = []
+                        result['more'].append(obj)
+                        result['all'].append(obj)
+        return result
 
 class APIError(Exception):
     """Base class for Deezer exceptions"""

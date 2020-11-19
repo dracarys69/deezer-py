@@ -131,3 +131,57 @@ def map_album(album):
         # Extras
         'nb_disk': album['NUMBER_DISK']
     }
+
+# maps gw-light api artist/albums to standard api
+def map_artist_album(album):
+    return {
+        'id': album['ALB_ID'],
+        'title': album['ALB_TITLE'],
+        'link': f"https://www.deezer.com/album/{album['ALB_ID']}",
+        'cover': f"https://api.deezer.com/album/{album['ALB_ID']}/image",
+        'cover_small': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/56x56-000000-80-0-0.jpg",
+        'cover_medium': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/250x250-000000-80-0-0.jpg",
+        'cover_big': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/500x500-000000-80-0-0.jpg",
+        'cover_xl': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/1000x1000-000000-80-0-0.jpg",
+        'genre_id': album['GENRE_ID'],
+        'fans': album['RANK'],
+        'release_date': album['PHYSICAL_RELEASE_DATE'],
+        'record_type': RELEASE_TYPE.get(int(album['TYPE']), "unknown"),
+        'tracklist': f"https://api.deezer.com/album/{album['ALB_ID']}/tracks",
+        'explicit_lyrics': int(album['EXPLICIT_LYRICS']) > 0,
+        'type': album['__TYPE__'],
+        # Extras
+        'nb_tracks': album['NUMBER_TRACK'],
+        'nb_disk': album['NUMBER_DISK']
+    }
+
+# maps gw-light api playlists to standard api
+def map_playlist(playlist):
+    return {
+            'id': playlist['PLAYLIST_ID'],
+            'title': playlist['TITLE'],
+            'description': playlist['DESCRIPTION'],
+            'duration': playlist['DURATION'],
+            'public': playlist['STATUS'] == 1,
+            'is_loved_track': playlist['TYPE'] == 4,
+            'collaborative': playlist['STATUS'] == 2,
+            'nb_tracks': playlist['NB_SONG'],
+            'fans': playlist['NB_FAN'],
+            'link': "https://www.deezer.com/playlist/"+playlist['PLAYLIST_ID'],
+            'share': "https://www.deezer.com/playlist/"+playlist['PLAYLIST_ID'],
+            'picture': "https://api.deezer.com/playlist/"+playlist['PLAYLIST_ID']+"/image",
+            'picture_small': "https://cdns-images.dzcdn.net/images/"+playlist['PICTURE_TYPE']+"/"+playlist['PLAYLIST_PICTURE']+"/56x56-000000-80-0-0.jpg",
+            'picture_medium': "https://cdns-images.dzcdn.net/images/"+playlist['PICTURE_TYPE']+"/"+playlist['PLAYLIST_PICTURE']+"/250x250-000000-80-0-0.jpg",
+            'picture_big': "https://cdns-images.dzcdn.net/images/"+playlist['PICTURE_TYPE']+"/"+playlist['PLAYLIST_PICTURE']+"/500x500-000000-80-0-0.jpg",
+            'picture_xl': "https://cdns-images.dzcdn.net/images/"+playlist['PICTURE_TYPE']+"/"+playlist['PLAYLIST_PICTURE']+"/1000x1000-000000-80-0-0.jpg",
+            'checksum': playlist['CHECKSUM'],
+            'tracklist': "https://api.deezer.com/playlist/"+playlist['PLAYLIST_ID']+"/tracks",
+            'creation_date': playlist['DATE_ADD'],
+            'creator': {
+                'id': playlist['PARENT_USER_ID'],
+                'name': playlist['PARENT_USERNAME'],
+                'tracklist': "https://api.deezer.com/user/"+playlist['PARENT_USER_ID']+"/flow",
+                'type': "user"
+            },
+            'type': "playlist"
+        }

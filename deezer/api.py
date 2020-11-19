@@ -53,7 +53,7 @@ class API:
     def get_album(self, album_id):
         return self.api_call(f'album/{str(album_id)}')
 
-    def get_track_by_UPC(self, upc):
+    def get_album_by_UPC(self, upc):
         return self.get_album(f'upc:{upc}')
 
     def get_album_comments(self, album_id, index=0, limit=10):
@@ -261,6 +261,34 @@ class API:
 
     def get_user_tracks(self, user_id, index=0, limit=25):
         return self.api_call(f'user/{str(user_id)}/tracks', {'index': index, 'limit': limit})
+
+    # Extra calls
+
+    def get_countries_charts(self):
+        temp = self.get_user_playlists('637006841')
+        result = sorted(temp, key=lambda k: k['title']) # Sort all playlists
+        if not result[0]['title'].startswith('Top'): result = result[1:] # Remove loved tracks playlist
+        return result
+
+    def get_track_id_from_metadata(self, artist, track, album):
+        artist = artist.replace("–", "-").replace("’", "'")
+        track = track.replace("–", "-").replace("’", "'")
+        album = album.replace("–", "-").replace("’", "'")
+
+        resp = self.advanced_search(artist=artist, track=track, album=album, limit=1)
+        if len(resp['data']) > 0: return resp['data'][0]['id']
+
+        resp = self.advanced_search(artist=artist, track=track, limit=1)
+        if len(resp['data']) > 0: return resp['data'][0]['id']
+
+        # Try removing version
+        if "(" in track and ")" in track and track.find("(") < track.find(")"):
+            resp = self.advanced_search(artist=artist, track=track[:track.find("(")], limit=1)
+            if len(resp['data']) > 0: return resp['data'][0]['id']
+        elif " - " in track:
+            resp = self.advanced_search(artist=artist, track=track[:track.find(" - ")], limit=1)
+            if len(resp['data']) > 0: return resp['data'][0]['id']
+        return 0
 
 class APIError(Exception):
     """Base class for Deezer exceptions"""
