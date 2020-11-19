@@ -2,7 +2,7 @@ import eventlet
 requests = eventlet.import_patched('requests')
 
 import json
-from deezer.utils import map_artist_album
+from deezer.utils import map_artist_album, map_user_track, map_user_artist, map_user_album, map_user_playlist
 
 class LyricsStatus():
     """Explicit Content Lyrics"""
@@ -79,6 +79,9 @@ class GW:
 
     def get_user_data(self):
         return self.api_call('deezer.getUserData')
+
+    def get_user_profile_page(self, user_id, tab, limit=10):
+        return self.api_call('deezer.pageProfile', {'user_id': user_id, 'tab': tab, 'nb': limit})
 
     def get_child_accounts(self):
         return self.api_call('deezer.getChildAccounts')
@@ -278,6 +281,34 @@ class GW:
         else:
             body = self.get_track(sng_id)
         return body
+
+    def get_user_playlists(self, user_id):
+        data = self.get_user_profile_page(user_id, 'playlists', limit=-1)['TAB']['playlists']['data']
+        result = []
+        for playlist in data:
+            result.append(map_user_playlist(playlist))
+        return result
+
+    def get_user_albums(self, user_id):
+        data = self.get_user_profile_page(user_id, 'albums', limit=-1)['TAB']['albums']['data']
+        result = []
+        for album in data:
+            result.append(map_user_album(album))
+        return result
+
+    def get_user_artists(self, user_id):
+        data = self.get_user_profile_page(user_id, 'artists', limit=-1)['TAB']['artists']['data']
+        result = []
+        for artist in data:
+            result.append(map_user_artist(artist))
+        return result
+
+    def get_user_tracks(self, user_id):
+        data = self.get_user_profile_page(user_id, 'loved', limit=-1)['TAB']['loved']['data']
+        result = []
+        for track in data:
+            result.append(map_user_track(track))
+        return result
 
 class APIError(Exception):
     """Base class for Deezer exceptions"""
