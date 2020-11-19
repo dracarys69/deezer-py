@@ -39,14 +39,14 @@ class API:
                 if result_json['error']['code'] in [4, 700]:
                     eventlet.sleep(5)
                     return self.api_call(method, args)
-                if result_json['error']['code'] == 100: raise ItemsLimitExceededException
-                if result_json['error']['code'] == 200: raise PermissionException
-                if result_json['error']['code'] == 300: raise InvalidTokenException
-                if result_json['error']['code'] == 500: raise WrongParameterException
-                if result_json['error']['code'] == 501: raise MissingParameterException
-                if result_json['error']['code'] == 600: raise InvalidQueryException
-                if result_json['error']['code'] == 800: raise DataException
-                if result_json['error']['code'] == 901: raise IndividualAccountChangedNotAllowedException
+                if result_json['error']['code'] == 100: raise ItemsLimitExceededException(f"ItemsLimitExceededException: {method}")
+                if result_json['error']['code'] == 200: raise PermissionException(f"PermissionException: {method}")
+                if result_json['error']['code'] == 300: raise InvalidTokenException(f"InvalidTokenException: {method}")
+                if result_json['error']['code'] == 500: raise WrongParameterException(f"ParameterException: {method}")
+                if result_json['error']['code'] == 501: raise MissingParameterException(f"MissingParameterException: {method}")
+                if result_json['error']['code'] == 600: raise InvalidQueryException(f"InvalidQueryException: {method}")
+                if result_json['error']['code'] == 800: raise DataException(f"DataException: {method}")
+                if result_json['error']['code'] == 901: raise IndividualAccountChangedNotAllowedException(f"IndividualAccountChangedNotAllowedException: {method}")
             raise APIError(json.dumps(result_json['error']))
         return result_json
 
