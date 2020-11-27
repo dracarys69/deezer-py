@@ -227,6 +227,16 @@ class GW:
                     "top_tracks": top_tracks
                 })
 
+    def search_music(self, query, type, index=0, limit=10):
+        return self.api_call('search.music',
+                             {
+                                 "query": query,
+                                 "filter": "ALL",
+                                 "output": type,
+                                 "start": index,
+                                 "nb": limit
+                             })
+
     # Extra calls
 
     def get_artist_discography_tabs(self, art_id, limit=100):
