@@ -31,6 +31,11 @@ class LyricsStatus():
     PARTIALLY_NO_ADVICE = 7
     """Partially No Advice Available (Album "lyrics" only)"""
 
+class PlaylistStatus():
+    PUBLIC = 0
+    PRIVATE = 1
+    COLLABORATIVE = 2
+
 EMPTY_TRACK_DICT = {
     'SNG_ID': 0,
     'SNG_TITLE': '',
@@ -173,6 +178,57 @@ class GW:
             track['POSITION'] = body['data'].index(track)
             tracks_array.append(track)
         return tracks_array
+
+    def create_playlist(self, title, status=PlaylistStatus.PUBLIC, description=None, songs=[]):
+        newSongs = []
+        for song in songs:
+            newSongs.append([song, 0])
+        return self.api_call('playlist.create', {
+            'title': title,
+            'status': status,
+            'description': description,
+            'songs': newSongs
+        })
+
+    def edit_playlist(self, playlist_id, title, status=None, description=None, songs=None):
+        newSongs = []
+        for song in songs:
+            newSongs.append([song, 0])
+        return self.api_call('playlist.update', {
+            'playlist_id': playlist_id,
+            'title': title,
+            'status': status,
+            'description': description,
+            'songs': newSongs
+        })
+
+    def add_songs_to_playlist(self, playlist_id, songs, offset=-1):
+        newSongs = []
+        for song in songs:
+            newSongs.append([song, 0])
+        return self.api_call('playlist.addSongs', {
+            'playlist_id': playlist_id,
+            'songs': newSongs,
+            'offset': offset
+        })
+
+    def add_song_to_playlist(self, playlist_id, sng_id, offset=-1):
+        return self.add_songs_to_playlist(playlist_id, [sng_id], offset)
+
+    def remove_songs_from_playlist(self, playlist_id, songs):
+        newSongs = []
+        for song in songs:
+            newSongs.append([song, 0])
+        return self.api_call('playlist.deleteSongs', {
+            'playlist_id': playlist_id,
+            'songs': newSongs
+        })
+
+    def remove_song_from_playlist(self, playlist_id, sng_id):
+        return self.remove_songs_from_playlist(playlist_id, [sng_id])
+
+    def delete_playlist(self, playlist_id):
+        return self.api_call('playlist.delete', {'playlist_id': playlist_id})
 
     def add_song_to_favorites(self, sng_id):
         return self.gw_api_call('favorite_song.add', {'SNG_ID': sng_id})
