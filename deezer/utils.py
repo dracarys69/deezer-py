@@ -82,6 +82,7 @@ def map_user_playlist(playlist, default_user_name=""):
     return {
         'id': playlist['PLAYLIST_ID'],
         'title': playlist['TITLE'],
+        'description': playlist['DESCRIPTION'],
         'nb_tracks': playlist['NB_SONG'],
         'link': 'https://www.deezer.com/playlist/'+str(playlist['PLAYLIST_ID']),
         'picture': 'https://api.deezer.com/playlist/'+str(playlist['PLAYLIST_ID'])+'/image',
@@ -90,6 +91,7 @@ def map_user_playlist(playlist, default_user_name=""):
         'picture_big': 'https://e-cdns-images.dzcdn.net/images/'+playlist['PICTURE_TYPE']+'/'+playlist['PLAYLIST_PICTURE']+'/500x500-000000-80-0-0.jpg',
         'picture_xl': 'https://e-cdns-images.dzcdn.net/images/'+playlist['PICTURE_TYPE']+'/'+playlist['PLAYLIST_PICTURE']+'/1000x1000-000000-80-0-0.jpg',
         'tracklist': 'https://api.deezer.com/playlist/'+str(playlist['PLAYLIST_ID'])+'/tracks',
+        'creation_date': playlist['DATE_ADD'],
         'creator': {
             'id': playlist['PARENT_USER_ID'],
             'name': playlist.get('PARENT_USERNAME', default_user_name)
