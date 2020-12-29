@@ -82,7 +82,7 @@ def map_user_playlist(playlist, default_user_name=""):
     return {
         'id': playlist['PLAYLIST_ID'],
         'title': playlist['TITLE'],
-        'description': playlist['DESCRIPTION'],
+        'description': playlist.get('DESCRIPTION', ''),
         'nb_tracks': playlist['NB_SONG'],
         'link': 'https://www.deezer.com/playlist/'+str(playlist['PLAYLIST_ID']),
         'picture': 'https://api.deezer.com/playlist/'+str(playlist['PLAYLIST_ID'])+'/image',
