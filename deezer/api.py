@@ -19,10 +19,12 @@ class API:
     def __init__(self, session, headers):
         self.http_headers = headers
         self.session = session
+        self.access_token = None
 
     def api_call(self, method, args=None):
         if args is None:
             args = {}
+        if self.access_token: args['access_token'] = self.access_token
         try:
             result = self.session.get(
                 "https://api.deezer.com/" + method,
