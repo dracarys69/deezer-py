@@ -197,5 +197,5 @@ def clean_search_query(term):
     term = re.sub(r' ft[\.]? ', " ", term)
     term = re.sub(r'\(feat[\.]? ', " ", term)
     term = re.sub(r'\(ft[\.]? ', " ", term)
-    term = term.replace('&', " ").replace('–', "-").replace('—', "-")
+    term = term.replace(' & ', " ").replace('–', "-").replace('—', "-")
     return term
