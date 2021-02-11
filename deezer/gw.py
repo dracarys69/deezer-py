@@ -1,5 +1,5 @@
-import eventlet
-requests = eventlet.import_patched('requests')
+import requests
+from time import sleep
 
 import json
 from deezer.utils import map_artist_album, map_user_track, map_user_artist, map_user_album, map_user_playlist
@@ -72,7 +72,7 @@ class GW:
             )
             result_json = result.json()
         except:
-            eventlet.sleep(2)
+            sleep(2)
             return self.api_call(method, args, params)
         if len(result_json['error']):
             raise APIError(json.dumps(result_json['error']))

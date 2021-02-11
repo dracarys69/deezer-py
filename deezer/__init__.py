@@ -1,5 +1,4 @@
-import eventlet
-requests = eventlet.import_patched('requests')
+import requests
 from deezer.gw import GW
 from deezer.api import API
 import json
@@ -18,15 +17,13 @@ class TrackFormats():
     LOCAL   = 0
 
 class Deezer:
-    def __init__(self):
+    def __init__(self, accept_language=None):
         self.http_headers = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) " \
                           "Chrome/79.0.3945.130 Safari/537.36",
-            "Accept-Language": None
+            "Accept-Language": accept_language
         }
         self.session = requests.Session()
-        self.session.mount('http://', requests.adapters.HTTPAdapter(pool_maxsize=100))
-        self.session.mount('https://', requests.adapters.HTTPAdapter(pool_maxsize=100))
 
         self.logged_in = False
         self.current_user = {}
@@ -36,11 +33,27 @@ class Deezer:
         self.api = API(self.session, self.http_headers)
         self.gw = GW(self.session, self.http_headers)
 
+    def get_accept_language(self):
+        return self.http_headers['Accept-Language']
+
     def set_accept_language(self, lang):
         self.http_headers['Accept-Language'] = lang
 
-    def get_accept_language(self):
-        return self.http_headers['Accept-Language']
+    def get_session(self):
+        return {
+            'logged_in': self.logged_in,
+            'current_user': self.current_user,
+            'childs': self.childs,
+            'selected_account': self.selected_account,
+            'cookies': self.session.cookies.get_dict()
+        }
+
+    def set_session(self, data):
+        self.logged_in = data['logged_in']
+        self.current_user = data['current_user']
+        self.childs = data['childs']
+        self.selected_account = data['selected_account']
+        self.session.cookies.update(data['cookies'])
 
     def login(self, email, password, re_captcha_token, child=0):
         # Check if user already logged in

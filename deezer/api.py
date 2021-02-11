@@ -1,5 +1,5 @@
-import eventlet
-requests = eventlet.import_patched('requests')
+import requests
+from time import sleep
 
 class SearchOrder():
     """Possible values for order parameter in search"""
@@ -34,12 +34,12 @@ class API:
             )
             result_json = result.json()
         except:
-            eventlet.sleep(2)
+            sleep(2)
             return self.api_call(method, args)
         if 'error' in result_json.keys():
             if 'code' in result_json['error']:
                 if result_json['error']['code'] in [4, 700]:
-                    eventlet.sleep(5)
+                    sleep(5)
                     return self.api_call(method, args)
                 if result_json['error']['code'] == 100: raise ItemsLimitExceededException(f"ItemsLimitExceededException: {method}")
                 if result_json['error']['code'] == 200: raise PermissionException(f"PermissionException: {method}")
