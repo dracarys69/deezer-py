@@ -53,6 +53,7 @@ class Deezer:
         self.current_user = data['current_user']
         self.childs = data['childs']
         self.selected_account = data['selected_account']
+        self.session = requests.Session()
         self.session.cookies.update(data['cookies'])
 
     def login(self, email, password, re_captcha_token, child=0):
