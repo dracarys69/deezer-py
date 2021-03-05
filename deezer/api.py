@@ -1,6 +1,8 @@
 import requests
 from time import sleep
 
+import json
+
 class SearchOrder():
     """Possible values for order parameter in search"""
     RANKING       = "RANKING"
