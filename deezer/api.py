@@ -28,13 +28,12 @@ class API:
             args = {}
         if self.access_token: args['access_token'] = self.access_token
         try:
-            result = self.session.get(
+            result_json = self.session.get(
                 "https://api.deezer.com/" + method,
                 params=args,
                 headers=self.http_headers,
                 timeout=30
-            )
-            result_json = result.json()
+            ).json()
         except:
             sleep(2)
             return self.api_call(method, args)
@@ -43,14 +42,14 @@ class API:
                 if result_json['error']['code'] in [4, 700]:
                     sleep(5)
                     return self.api_call(method, args)
-                if result_json['error']['code'] == 100: raise ItemsLimitExceededException(f"ItemsLimitExceededException: {method}")
-                if result_json['error']['code'] == 200: raise PermissionException(f"PermissionException: {method}")
-                if result_json['error']['code'] == 300: raise InvalidTokenException(f"InvalidTokenException: {method}")
-                if result_json['error']['code'] == 500: raise WrongParameterException(f"ParameterException: {method}")
-                if result_json['error']['code'] == 501: raise MissingParameterException(f"MissingParameterException: {method}")
-                if result_json['error']['code'] == 600: raise InvalidQueryException(f"InvalidQueryException: {method}")
-                if result_json['error']['code'] == 800: raise DataException(f"DataException: {method}")
-                if result_json['error']['code'] == 901: raise IndividualAccountChangedNotAllowedException(f"IndividualAccountChangedNotAllowedException: {method}")
+                if result_json['error']['code'] == 100: raise ItemsLimitExceededException(f"ItemsLimitExceededException: {method} {result_json['error']['message'] if 'message' in result_json['error'] else ''}")
+                if result_json['error']['code'] == 200: raise PermissionException(f"PermissionException: {method} {result_json['error']['message'] if 'message' in result_json['error'] else ''}")
+                if result_json['error']['code'] == 300: raise InvalidTokenException(f"InvalidTokenException: {method} {result_json['error']['message'] if 'message' in result_json['error'] else ''}")
+                if result_json['error']['code'] == 500: raise WrongParameterException(f"ParameterException: {method} {result_json['error']['message'] if 'message' in result_json['error'] else ''}")
+                if result_json['error']['code'] == 501: raise MissingParameterException(f"MissingParameterException: {method} {result_json['error']['message'] if 'message' in result_json['error'] else ''}")
+                if result_json['error']['code'] == 600: raise InvalidQueryException(f"InvalidQueryException: {method} {result_json['error']['message'] if 'message' in result_json['error'] else ''}")
+                if result_json['error']['code'] == 800: raise DataException(f"DataException: {method} {result_json['error']['message'] if 'message' in result_json['error'] else ''}")
+                if result_json['error']['code'] == 901: raise IndividualAccountChangedNotAllowedException(f"IndividualAccountChangedNotAllowedException: {method} {result_json['error']['message'] if 'message' in result_json['error'] else ''}")
             raise APIError(json.dumps(result_json['error']))
         return result_json
 
@@ -292,7 +291,7 @@ class API:
         elif " - " in track:
             resp = self.advanced_search(artist=artist, track=track[:track.find(" - ")], limit=1)
             if len(resp['data']) > 0: return resp['data'][0]['id']
-        return 0
+        return "0"
 
 class APIError(Exception):
     """Base class for Deezer exceptions"""

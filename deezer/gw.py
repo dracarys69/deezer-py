@@ -36,7 +36,7 @@ class PlaylistStatus():
     PRIVATE = 1
     COLLABORATIVE = 2
 
-EMPTY_TRACK_DICT = {
+EMPTY_TRACK_OBJ = {
     'SNG_ID': 0,
     'SNG_TITLE': '',
     'DURATION': 0,
@@ -63,20 +63,19 @@ class GW:
              'method': method}
         p.update(params)
         try:
-            result = self.session.post(
+            result_json = self.session.post(
                 "http://www.deezer.com/ajax/gw-light.php",
                 params=p,
                 timeout=30,
                 json=args,
                 headers=self.http_headers
-            )
-            result_json = result.json()
+            ).json()
         except:
             sleep(2)
             return self.api_call(method, args, params)
         if len(result_json['error']):
             raise APIError(json.dumps(result_json['error']))
-        return result.json()['results']
+        return result_json['results']
 
     def _get_token(self):
         token_data = self.get_user_data()
@@ -109,7 +108,7 @@ class GW:
                 tracks_array.append(body['data'][i - errors])
             else:
                 errors += 1
-                tracks_array.append(EMPTY_TRACK_DICT)
+                tracks_array.append(EMPTY_TRACK_OBJ)
         return tracks_array
 
     def get_album(self, alb_id):
@@ -117,18 +116,17 @@ class GW:
 
     def get_album_page(self, alb_id):
         return self.api_call('deezer.pageAlbum', {
-                                'alb_id': alb_id,
-                                'lang': 'en',
-                                'header': True,
-                                'tab': 0
-                            })
+            'alb_id': alb_id,
+            'lang': 'en',
+            'header': True,
+            'tab': 0
+        })
 
     def get_album_tracks(self, alb_id):
         tracks_array = []
         body = self.api_call('song.getListByAlbum', {'alb_id': alb_id, 'nb': -1})
         for track in body['data']:
-            _track = track
-            _track['POSITION'] = body['data'].index(track)
+            track['POSITION'] = body['data'].index(track)
             tracks_array.append(_track)
         return tracks_array
 
@@ -137,11 +135,11 @@ class GW:
 
     def get_artist_page(self, art_id):
         return self.api_call('deezer.pageArtist', {
-                                'alb_id': art_id,
-                                'lang': 'en',
-                                'header': True,
-                                'tab': 0
-                            })
+            'art_id': art_id,
+            'lang': 'en',
+            'header': True,
+            'tab': 0
+        })
 
     def get_artist_top_tracks(self, art_id, limit=100):
         tracks_array = []
@@ -153,23 +151,23 @@ class GW:
 
     def get_artist_discography(self, art_id, index=0, limit=25):
         return self.api_call('album.getDiscography', {
-                                'art_id': art_id,
-                                "discography_mode":"all",
-                                'nb': limit,
-                                'nb_songs': 0,
-                                'start': index
-                            })
+            'art_id': art_id,
+            "discography_mode":"all",
+            'nb': limit,
+            'nb_songs': 0,
+            'start': index
+        })
 
     def get_playlist(self, playlist_id):
         return self.api_call('playlist.getData', {'playlist_id': playlist_id})
 
     def get_playlist_page(self, playlist_id):
         return self.api_call('deezer.pagePlaylist', {
-                                'playlist_id': playlist_id,
-                                'lang': 'en',
-                                'header': True,
-                                'tab': 0
-                        })
+            'playlist_id': playlist_id,
+            'lang': 'en',
+            'header': True,
+            'tab': 0
+        })
 
     def get_playlist_tracks(self, playlist_id):
         tracks_array = []
@@ -190,7 +188,7 @@ class GW:
             'songs': newSongs
         })
 
-    def edit_playlist(self, playlist_id, title, status=None, description=None, songs=None):
+    def edit_playlist(self, playlist_id, title, status=None, description=None, songs=[]):
         newSongs = []
         for song in songs:
             newSongs.append([song, 0])
@@ -275,23 +273,22 @@ class GW:
 
     def search(self, query, index=0, limit=10, suggest=True, artist_suggest=True, top_tracks=True):
         return self.api_call('deezer.pageSearch', {
-                    "query": query,
-                    "start": index,
-                    "nb": limit,
-                    "suggest": suggest,
-                    "artist_suggest": artist_suggest,
-                    "top_tracks": top_tracks
-                })
+            "query": query,
+            "start": index,
+            "nb": limit,
+            "suggest": suggest,
+            "artist_suggest": artist_suggest,
+            "top_tracks": top_tracks
+        })
 
     def search_music(self, query, type, index=0, limit=10):
-        return self.api_call('search.music',
-                             {
-                                 "query": query,
-                                 "filter": "ALL",
-                                 "output": type,
-                                 "start": index,
-                                 "nb": limit
-                             })
+        return self.api_call('search.music', {
+            "query": query,
+            "filter": "ALL",
+            "output": type,
+            "start": index,
+            "nb": limit
+        })
 
     # Extra calls
 
@@ -350,7 +347,7 @@ class GW:
 
     def get_user_playlists(self, user_id, limit=25):
         user_profile_page = self.get_user_profile_page(user_id, 'playlists', limit=limit)
-        blog_name = user_profile_page['DATA']['USER'].get('BLOG_NAME', "Unkown")
+        blog_name = user_profile_page['DATA']['USER'].get('BLOG_NAME', "Unknown")
         data = user_profile_page['TAB']['playlists']['data']
         result = []
         for playlist in data:

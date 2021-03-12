@@ -1,7 +1,6 @@
 import requests
 from deezer.gw import GW
 from deezer.api import API
-import json
 
 __version__ = "0.0.15"
 
@@ -124,10 +123,8 @@ class Deezer:
             })
 
     def change_account(self, child_n):
-        if len(self.childs)-1 >= child_n:
-            self.current_user =self.childs[child_n]
-            self.selected_account = child_n
-        else:
-            self.current_user = self.childs[0]
-            self.selected_account = 0
+        if len(self.childs)-1 < child_n: child_n = 0
+        self.current_user = self.childs[child_n]
+        self.selected_account = child_n
+
         return (self.current_user, self.selected_account)

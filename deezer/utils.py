@@ -45,7 +45,7 @@ def map_user_artist(artist):
         'id': artist['ART_ID'],
         'name': artist['ART_NAME'],
         'link': 'https://www.deezer.com/artist/'+str(artist['ART_ID']),
-        'picture': 'https://api.deezer.com/artist/'+str(artist['ART_PICTURE'])+'/image',
+        'picture': 'https://api.deezer.com/artist/'+str(artist['ART_ID'])+'/image',
         'picture_small': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(artist['ART_PICTURE'])+'/56x56-000000-80-0-0.jpg',
         'picture_medium': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(artist['ART_PICTURE'])+'/250x250-000000-80-0-0.jpg',
         'picture_big': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(artist['ART_PICTURE'])+'/500x500-000000-80-0-0.jpg',
