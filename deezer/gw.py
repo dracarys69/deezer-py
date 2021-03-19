@@ -74,7 +74,7 @@ class GW:
             sleep(2)
             return self.api_call(method, args, params)
         if len(result_json['error']):
-            raise APIError(json.dumps(result_json['error']))
+            raise GWAPIError(json.dumps(result_json['error']))
         return result_json['results']
 
     def _get_token(self):
@@ -375,6 +375,6 @@ class GW:
             result.append(map_user_track(track))
         return result
 
-class APIError(Exception):
+class GWAPIError(Exception):
     """Base class for Deezer exceptions"""
     pass
