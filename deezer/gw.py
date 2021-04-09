@@ -127,7 +127,7 @@ class GW:
         body = self.api_call('song.getListByAlbum', {'alb_id': alb_id, 'nb': -1})
         for track in body['data']:
             track['POSITION'] = body['data'].index(track)
-            tracks_array.append(_track)
+            tracks_array.append(track)
         return tracks_array
 
     def get_artist(self, art_id):
@@ -229,28 +229,28 @@ class GW:
         return self.api_call('playlist.delete', {'playlist_id': playlist_id})
 
     def add_song_to_favorites(self, sng_id):
-        return self.gw_api_call('favorite_song.add', {'SNG_ID': sng_id})
+        return self.api_call('favorite_song.add', {'SNG_ID': sng_id})
 
     def remove_song_from_favorites(self, sng_id):
-        return self.gw_api_call('favorite_song.remove', {'SNG_ID': sng_id})
+        return self.api_call('favorite_song.remove', {'SNG_ID': sng_id})
 
     def add_album_to_favorites(self, alb_id):
-        return self.gw_api_call('album.addFavorite', {'ALB_ID': alb_id})
+        return self.api_call('album.addFavorite', {'ALB_ID': alb_id})
 
     def remove_album_from_favorites(self, alb_id):
-        return self.gw_api_call('album.deleteFavorite', {'ALB_ID': alb_id})
+        return self.api_call('album.deleteFavorite', {'ALB_ID': alb_id})
 
     def add_artist_to_favorites(self, art_id):
-        return self.gw_api_call('artist.addFavorite', {'ART_ID': art_id})
+        return self.api_call('artist.addFavorite', {'ART_ID': art_id})
 
     def remove_artist_from_favorites(self, art_id):
-        return self.gw_api_call('artist.deleteFavorite', {'ART_ID': art_id})
+        return self.api_call('artist.deleteFavorite', {'ART_ID': art_id})
 
     def add_playlist_to_favorites(self, playlist_id):
-        return self.gw_api_call('playlist.addFavorite', {'PARENT_PLAYLIST_ID': playlist_id})
+        return self.api_call('playlist.addFavorite', {'PARENT_PLAYLIST_ID': playlist_id})
 
     def remove_playlist_from_favorites(self, playlist_id):
-        return self.gw_api_call('playlist.deleteFavorite', {'PLAYLIST_ID': playlist_id})
+        return self.api_call('playlist.deleteFavorite', {'PLAYLIST_ID': playlist_id})
 
     def get_page(self, page):
         params = {

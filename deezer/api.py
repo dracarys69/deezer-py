@@ -244,9 +244,6 @@ class API:
     def get_user_artists(self, user_id, index=0, limit=25):
         return self.api_call(f'user/{str(user_id)}/artists', {'index': index, 'limit': limit})
 
-    def get_user_artists(self, user_id, index=0, limit=25):
-        return self.api_call(f'user/{str(user_id)}/artists', {'index': index, 'limit': limit})
-
     def get_user_flow(self, user_id, index=0, limit=25):
         return self.api_call(f'user/{str(user_id)}/flow', {'index': index, 'limit': limit})
 
