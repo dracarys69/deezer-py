@@ -2,7 +2,7 @@ import requests
 from deezer.gw import GW
 from deezer.api import API
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 class TrackFormats():
     """Number associtation for formats"""
@@ -113,13 +113,19 @@ class Deezer:
                 self.childs.append({
                     'id': child["USER_ID"],
                     'name': child["BLOG_NAME"],
-                    'picture': child.get("USER_PICTURE", "")
+                    'picture': child.get("USER_PICTURE", ""),
+                    'license_token': child["OPTIONS"]["license_token"],
+                    'can_stream_hq': child["OPTIONS"]["web_hq"] or child["OPTIONS"]["mobile_hq"],
+                    'can_stream_lossless': child["OPTIONS"]["web_lossless"] or child["OPTIONS"]["mobile_lossless"]
                 })
         else:
             self.childs.append({
                 'id': user_data["USER"]["USER_ID"],
                 'name': user_data["USER"]["BLOG_NAME"],
-                'picture': user_data["USER"].get("USER_PICTURE", "")
+                'picture': user_data["USER"].get("USER_PICTURE", ""),
+                'license_token': user_data["USER"]["OPTIONS"]["license_token"],
+                'can_stream_hq': user_data["USER"]["OPTIONS"]["web_hq"] or user_data["USER"]["OPTIONS"]["mobile_hq"],
+                'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"]
             })
 
     def change_account(self, child_n):
@@ -128,3 +134,34 @@ class Deezer:
         self.selected_account = child_n
 
         return (self.current_user, self.selected_account)
+
+    def get_tracks_urls(self, track_tokens):
+        if not isinstance(track_tokens, list):
+            track_tokens = [track_tokens, ]
+        if not self.current_user['license_token']:
+            return []
+
+        response = self.session.post(
+            "https://media.deezer.com/v1/get_url",
+            json={
+                'license_token': self.current_user['license_token'],
+                'media': [{
+                    'type': "FULL",
+                    'formats': [
+                        { 'cipher': "BF_CBC_STRIPE", 'format': "FLAC" },
+                        { 'cipher': "BF_CBC_STRIPE", 'format': "MP3_320" },
+                        { 'cipher': "BF_CBC_STRIPE", 'format': "MP3_256" },
+                        { 'cipher': "BF_CBC_STRIPE", 'format': "MP3_128" },
+                        { 'cipher': "BF_CBC_STRIPE", 'format': "MP3_64" },
+                        { 'cipher': "BF_CBC_STRIPE", 'format': "MP3_MISC" },
+                        { 'cipher': "BF_CBC_STRIPE", 'format': "MP4_RA3" },
+                        { 'cipher': "BF_CBC_STRIPE", 'format': "MP4_RA2" },
+                        { 'cipher': "BF_CBC_STRIPE", 'format': "MP4_RA1" }
+                    ]
+                }],
+                'track_tokens': track_tokens
+            },
+            headers = self.http_headers
+        ).json()
+
+        return response['data']
