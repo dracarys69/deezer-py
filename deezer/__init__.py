@@ -2,7 +2,7 @@ import requests
 from deezer.gw import GW
 from deezer.api import API
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 class TrackFormats():
     """Number associtation for formats"""
@@ -114,9 +114,9 @@ class Deezer:
                     'id': child["USER_ID"],
                     'name': child["BLOG_NAME"],
                     'picture': child.get("USER_PICTURE", ""),
-                    'license_token': child["OPTIONS"]["license_token"],
-                    'can_stream_hq': child["OPTIONS"]["web_hq"] or child["OPTIONS"]["mobile_hq"],
-                    'can_stream_lossless': child["OPTIONS"]["web_lossless"] or child["OPTIONS"]["mobile_lossless"]
+                    'license_token': user_data["USER"]["OPTIONS"]["license_token"],
+                    'can_stream_hq': user_data["USER"]["OPTIONS"]["web_hq"] or user_data["USER"]["OPTIONS"]["mobile_hq"],
+                    'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"]
                 })
         else:
             self.childs.append({
