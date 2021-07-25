@@ -164,4 +164,6 @@ class Deezer:
         except requests.exceptions.HTTPError:
             return None
 
-        return response['data'][0]['media'][0]['sources'][0]['url']
+        if response.get('data') and response['data'][0].get('media'):
+            return response['data'][0]['media'][0]['sources'][0]['url']
+        return None
