@@ -147,7 +147,7 @@ class Deezer:
             track_tokens = [track_tokens, ]
         if not self.current_user['license_token']:
             return None
-        if track_format == "FLAC" and not self.current_user.can_stream_lossless or format == "MP3_320" and not self.current_user.can_stream_hq:
+        if track_format == "FLAC" and not self.current_user['can_stream_lossless'] or format == "MP3_320" and not self.current_user['can_stream_hq']:
             raise WrongLicense(format)
 
         try:
@@ -171,7 +171,7 @@ class Deezer:
             return None
 
         if len(response.get('data', [])):
-            if response['data'][0]['errors']:
+            if 'errors' in response['data'][0]:
                 if response['data'][0]['errors'][0]['code'] == 2002:
                     raise WrongGeolocation(self.current_user.country)
                 raise DeezerError(json.dumps(response))
