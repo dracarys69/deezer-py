@@ -3,6 +3,7 @@ from time import sleep
 
 import json
 from deezer.utils import map_artist_album, map_user_track, map_user_artist, map_user_album, map_user_playlist
+from deezer.errors import GWAPIError
 
 class LyricsStatus():
     """Explicit Content Lyrics"""
@@ -374,7 +375,3 @@ class GW:
         for track in data:
             result.append(map_user_track(track))
         return result
-
-class GWAPIError(Exception):
-    """Base class for Deezer exceptions"""
-    pass

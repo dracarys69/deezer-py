@@ -1,6 +1,8 @@
 import requests
+import json
 from deezer.gw import GW
 from deezer.api import API
+from deezer.errors import DeezerError, WrongLicense, WrongGeolocation
 
 __version__ = "1.0.4"
 
@@ -116,7 +118,8 @@ class Deezer:
                     'picture': child.get("USER_PICTURE", ""),
                     'license_token': user_data["USER"]["OPTIONS"]["license_token"],
                     'can_stream_hq': user_data["USER"]["OPTIONS"]["web_hq"] or user_data["USER"]["OPTIONS"]["mobile_hq"],
-                    'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"]
+                    'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"],
+                    'country': user_data["COUNTRY"]
                 })
         else:
             self.childs.append({
@@ -125,7 +128,8 @@ class Deezer:
                 'picture': user_data["USER"].get("USER_PICTURE", ""),
                 'license_token': user_data["USER"]["OPTIONS"]["license_token"],
                 'can_stream_hq': user_data["USER"]["OPTIONS"]["web_hq"] or user_data["USER"]["OPTIONS"]["mobile_hq"],
-                'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"]
+                'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"],
+                'country': user_data["COUNTRY"]
             })
 
     def change_account(self, child_n):
@@ -142,7 +146,9 @@ class Deezer:
         if not isinstance(track_tokens, list):
             track_tokens = [track_tokens, ]
         if not self.current_user['license_token']:
-            return []
+            return None
+        if track_format == "FLAC" and not self.current_user.can_stream_lossless or format == "MP3_320" and not self.current_user.can_stream_hq:
+            raise WrongLicense(format)
 
         try:
             request = self.session.post(
@@ -164,6 +170,11 @@ class Deezer:
         except requests.exceptions.HTTPError:
             return None
 
-        if response.get('data') and response['data'][0].get('media'):
-            return response['data'][0]['media'][0]['sources'][0]['url']
+        if len(response.get('data', [])):
+            if response['data'][0]['errors']:
+                if response['data'][0]['errors'][0]['code'] == 2002:
+                    raise WrongGeolocation(self.current_user.country)
+                raise DeezerError(json.dumps(response))
+            if response['data'][0]['media']:
+                return response['data'][0]['media'][0]['sources'][0]['url']
         return None

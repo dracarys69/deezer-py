@@ -2,6 +2,9 @@ import requests
 from time import sleep
 
 import json
+from deezer.errors import ItemsLimitExceededException, PermissionException, InvalidTokenException, \
+WrongParameterException, MissingParameterException, InvalidQueryException, DataException, \
+IndividualAccountChangedNotAllowedException, APIError
 
 class SearchOrder():
     """Possible values for order parameter in search"""
@@ -289,31 +292,3 @@ class API:
             resp = self.advanced_search(artist=artist, track=track[:track.find(" - ")], limit=1)
             if len(resp['data']) > 0: return resp['data'][0]['id']
         return "0"
-
-class APIError(Exception):
-    """Base class for Deezer exceptions"""
-    pass
-
-class ItemsLimitExceededException(APIError):
-    pass
-
-class PermissionException(APIError):
-    pass
-
-class InvalidTokenException(APIError):
-    pass
-
-class WrongParameterException(APIError):
-    pass
-
-class MissingParameterException(APIError):
-    pass
-
-class InvalidQueryException(APIError):
-    pass
-
-class DataException(APIError):
-    pass
-
-class IndividualAccountChangedNotAllowedException(APIError):
-    pass
