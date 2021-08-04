@@ -4,7 +4,7 @@ from deezer.gw import GW
 from deezer.api import API
 from deezer.errors import DeezerError, WrongLicense, WrongGeolocation
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
 class TrackFormats():
     """Number associtation for formats"""
@@ -173,7 +173,7 @@ class Deezer:
         if len(response.get('data', [])):
             if 'errors' in response['data'][0]:
                 if response['data'][0]['errors'][0]['code'] == 2002:
-                    raise WrongGeolocation(self.current_user.country)
+                    raise WrongGeolocation(self.current_user['country'])
                 raise DeezerError(json.dumps(response))
             if response['data'][0]['media']:
                 return response['data'][0]['media'][0]['sources'][0]['url']
