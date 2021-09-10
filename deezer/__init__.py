@@ -4,7 +4,7 @@ from deezer.gw import GW
 from deezer.api import API
 from deezer.errors import DeezerError, WrongLicense, WrongGeolocation
 
-__version__ = "1.1.3"
+__version__ = "1.2.2"
 
 class TrackFormats():
     """Number associtation for formats"""
@@ -58,6 +58,7 @@ class Deezer:
         self.session.cookies.update(data['cookies'])
 
     def login(self, email, password, re_captcha_token, child=0):
+        if child: child = int(child)
         # Check if user already logged in
         user_data = self.gw.get_user_data()
         if user_data['USER']['USER_ID'] == 0:
@@ -88,6 +89,7 @@ class Deezer:
 
     def login_via_arl(self, arl, child=0):
         arl = arl.strip()
+        if child: child = int(child)
         cookie_obj = requests.cookies.create_cookie(
             domain='.deezer.com',
             name='arl',
@@ -108,19 +110,20 @@ class Deezer:
 
     def _post_login(self, user_data):
         self.childs = []
-        family = user_data["USER"]["MULTI_ACCOUNT"]["ENABLED"]
+        family = user_data["USER"]["MULTI_ACCOUNT"]["ENABLED"] and not user_data["USER"]["MULTI_ACCOUNT"]["IS_SUB_ACCOUNT"]
         if family:
             childs = self.gw.get_child_accounts()
             for child in childs:
-                self.childs.append({
-                    'id': child["USER_ID"],
-                    'name': child["BLOG_NAME"],
-                    'picture': child.get("USER_PICTURE", ""),
-                    'license_token': user_data["USER"]["OPTIONS"]["license_token"],
-                    'can_stream_hq': user_data["USER"]["OPTIONS"]["web_hq"] or user_data["USER"]["OPTIONS"]["mobile_hq"],
-                    'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"],
-                    'country': user_data["COUNTRY"]
-                })
+                if child['EXTRA_FAMILY']['IS_LOGGABLE_AS']:
+                    self.childs.append({
+                        'id': child["USER_ID"],
+                        'name': child["BLOG_NAME"],
+                        'picture': child.get("USER_PICTURE", ""),
+                        'license_token': user_data["USER"]["OPTIONS"]["license_token"],
+                        'can_stream_hq': user_data["USER"]["OPTIONS"]["web_hq"] or user_data["USER"]["OPTIONS"]["mobile_hq"],
+                        'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"],
+                        'country': user_data["COUNTRY"]
+                    })
         else:
             self.childs.append({
                 'id': user_data["USER"]["USER_ID"],
