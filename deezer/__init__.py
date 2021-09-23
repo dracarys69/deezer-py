@@ -139,16 +139,23 @@ class Deezer:
         return (self.current_user, self.selected_account)
 
     def get_track_url(self, track_token, track_format):
-        return self.get_tracks_url([track_token, ], track_format)
+        tracks = self.get_tracks_url([track_token, ], track_format)
+        if len(tracks) > 0:
+            if isinstance(tracks[0], DeezerError):
+                raise tracks[0]
+            else:
+                return tracks[0]
+        return None
 
     def get_tracks_url(self, track_tokens, track_format):
         if not isinstance(track_tokens, list):
             track_tokens = [track_tokens, ]
         if not self.current_user['license_token']:
-            return None
+            return []
         if track_format == "FLAC" and not self.current_user['can_stream_lossless'] or format == "MP3_320" and not self.current_user['can_stream_hq']:
             raise WrongLicense(format)
 
+        result = []
         try:
             request = self.session.post(
                 "https://media.deezer.com/v1/get_url",
@@ -167,13 +174,17 @@ class Deezer:
             request.raise_for_status()
             response = request.json()
         except requests.exceptions.HTTPError:
-            return None
+            return []
 
         if len(response.get('data', [])):
-            if 'errors' in response['data'][0]:
-                if response['data'][0]['errors'][0]['code'] == 2002:
-                    raise WrongGeolocation(self.current_user['country'])
-                raise DeezerError(json.dumps(response))
-            if response['data'][0]['media']:
-                return response['data'][0]['media'][0]['sources'][0]['url']
-        return None
+            for data in response['data']:
+                if 'errors' in data:
+                    if data['errors'][0]['code'] == 2002:
+                        result.append(WrongGeolocation(self.current_user['country']))
+                    else:
+                        result.append(DeezerError(json.dumps(response)))
+                if data['media']:
+                    result.append(data['media'][0]['sources'][0]['url'])
+                else:
+                    result.append(None)
+        return result
