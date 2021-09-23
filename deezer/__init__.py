@@ -18,11 +18,10 @@ class TrackFormats():
     LOCAL   = 0
 
 class Deezer:
-    def __init__(self, accept_language=None):
+    def __init__(self):
         self.http_headers = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) " \
-                          "Chrome/79.0.3945.130 Safari/537.36",
-            "Accept-Language": accept_language
+                          "Chrome/79.0.3945.130 Safari/537.36"
         }
         self.session = requests.Session()
 
@@ -33,12 +32,6 @@ class Deezer:
 
         self.api = API(self.session, self.http_headers)
         self.gw = GW(self.session, self.http_headers)
-
-    def get_accept_language(self):
-        return self.http_headers['Accept-Language']
-
-    def set_accept_language(self, lang):
-        self.http_headers['Accept-Language'] = lang
 
     def get_session(self):
         return {
@@ -122,7 +115,8 @@ class Deezer:
                         'license_token': user_data["USER"]["OPTIONS"]["license_token"],
                         'can_stream_hq': user_data["USER"]["OPTIONS"]["web_hq"] or user_data["USER"]["OPTIONS"]["mobile_hq"],
                         'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"],
-                        'country': user_data["COUNTRY"]
+                        'country': user_data["USER"]["OPTIONS"]["license_country"],
+                        'language': user_data["USER"]["SETTING"]["global"]["language"]
                     })
         else:
             self.childs.append({
@@ -132,13 +126,15 @@ class Deezer:
                 'license_token': user_data["USER"]["OPTIONS"]["license_token"],
                 'can_stream_hq': user_data["USER"]["OPTIONS"]["web_hq"] or user_data["USER"]["OPTIONS"]["mobile_hq"],
                 'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"],
-                'country': user_data["COUNTRY"]
+                'country': user_data["USER"]["OPTIONS"]["license_country"],
+                'language': user_data["USER"]["SETTING"]["global"]["language"]
             })
 
     def change_account(self, child_n):
         if len(self.childs)-1 < child_n: child_n = 0
         self.current_user = self.childs[child_n]
         self.selected_account = child_n
+        self.http_headers["Accept-Language"] = self.current_user['language']
 
         return (self.current_user, self.selected_account)
 
