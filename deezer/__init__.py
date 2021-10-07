@@ -150,9 +150,9 @@ class Deezer:
     def get_tracks_url(self, track_tokens, track_format):
         if not isinstance(track_tokens, list):
             track_tokens = [track_tokens, ]
-        if not self.current_user['license_token']:
+        if not self.current_user.get('license_token'):
             return []
-        if track_format == "FLAC" and not self.current_user['can_stream_lossless'] or format == "MP3_320" and not self.current_user['can_stream_hq']:
+        if track_format == "FLAC" and not self.current_user.get('can_stream_lossless') or format == "MP3_320" and not self.current_user.get('can_stream_hq'):
             raise WrongLicense(format)
 
         result = []
