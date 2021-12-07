@@ -88,6 +88,9 @@ class GW:
     def get_user_profile_page(self, user_id, tab, limit=10):
         return self.api_call('deezer.pageProfile', {'user_id': user_id, 'tab': tab, 'nb': limit})
 
+    def get_user_favorite_ids(self, checksum = None, limit = 10000, start = 0):
+        return self.api_call('song.getFavoriteIds', {'nb': limit, 'start': start, 'checksum': checksum})
+
     def get_child_accounts(self):
         return self.api_call('deezer.getChildAccounts')
 
@@ -100,7 +103,7 @@ class GW:
     def get_track_lyrics(self, sng_id):
         return self.api_call('song.getLyrics', {'sng_id': sng_id})
 
-    def get_tracks_gw(self, sng_ids):
+    def get_tracks(self, sng_ids):
         tracks_array = []
         body = self.api_call('song.getListData', {'sng_ids': sng_ids})
         errors = 0
@@ -370,8 +373,20 @@ class GW:
         return result
 
     def get_user_tracks(self, user_id, limit=25):
+        user_data = self.get_user_data()
+        if user_data['USER']['USER_ID'] == user_id: return self.get_my_favorite_tracks()
         data = self.get_user_profile_page(user_id, 'loved', limit=limit)['TAB']['loved']['data']
         result = []
         for track in data:
+            result.append(map_user_track(track))
+        return result
+
+    def get_my_favorite_tracks(self, limit=25):
+        ids_raw = self.get_user_favorite_ids(limit=limit)
+        ids = [ x['SNG_ID'] for x in ids_raw['data'] ]
+        data = self.get_tracks(ids)
+        result = []
+        for (i, track) in enumerate(data):
+            track = dict(track, **ids_raw['data'][i])
             result.append(map_user_track(track))
         return result

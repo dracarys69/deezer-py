@@ -4,6 +4,12 @@ RELEASE_TYPE = {0:"single", 1:"album", 2:"compile", 3:"ep", 4:"bundle"}
 
 # maps gw-light api user/tracks to standard api
 def map_user_track(track):
+    art_picture = track.get('ART_PICTURE')
+    if not art_picture:
+        for artist in track['ARTISTS']:
+            if artist['ART_ID'] == track['ART_ID']:
+                art_picture = artist['ART_PICTURE']
+                break
     return {
         'id': track['SNG_ID'],
         'title': track['SNG_TITLE'],
@@ -13,7 +19,7 @@ def map_user_track(track):
         'explicit_lyrics': int(track['EXPLICIT_LYRICS']) > 0,
         'explicit_content_lyrics': track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_COVER_STATUS'],
         'explicit_content_cover': track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_LYRICS_STATUS'],
-        'time_add': track['DATE_ADD'],
+        'time_add': track.get('DATE_ADD') or track.get('DATE_FAVORITE'),
         'album': {
                 'id': track['ALB_ID'],
                 'title': track['ALB_TITLE'],
@@ -29,10 +35,10 @@ def map_user_track(track):
                 'id': track['ART_ID'],
                 'name': track['ART_NAME'],
                 'picture': 'https://api.deezer.com/artist/'+str(track['ART_ID'])+'/image',
-                'picture_small': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(track['ART_PICTURE'])+'/56x56-000000-80-0-0.jpg',
-                'picture_medium': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(track['ART_PICTURE'])+'/250x250-000000-80-0-0.jpg',
-                'picture_big': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(track['ART_PICTURE'])+'/500x500-000000-80-0-0.jpg',
-                'picture_xl': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(track['ART_PICTURE'])+'/1000x1000-000000-80-0-0.jpg',
+                'picture_small': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/56x56-000000-80-0-0.jpg',
+                'picture_medium': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/250x250-000000-80-0-0.jpg',
+                'picture_big': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/500x500-000000-80-0-0.jpg',
+                'picture_xl': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/1000x1000-000000-80-0-0.jpg',
                 'tracklist': 'https://api.deezer.com/artist/'+str(track['ART_ID'])+'/top?limit=50',
                 'type': 'artist'
         },
