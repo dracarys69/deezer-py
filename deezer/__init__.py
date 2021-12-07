@@ -54,6 +54,9 @@ class Deezer:
         if child: child = int(child)
         # Check if user already logged in
         user_data = self.gw.get_user_data()
+        if not user_data or user_data and len(user_data.keys()) == 0:
+            self.logged_in = False
+            return False
         if user_data['USER']['USER_ID'] == 0:
             self.logged_in = False
             return False
@@ -93,6 +96,9 @@ class Deezer:
         self.session.cookies.set_cookie(cookie_obj)
         user_data = self.gw.get_user_data()
         # Check if user logged in
+        if not user_data or user_data and len(user_data.keys()) == 0:
+            self.logged_in = False
+            return False
         if user_data["USER"]["USER_ID"] == 0:
             self.logged_in = False
             return False
