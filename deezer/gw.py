@@ -71,7 +71,7 @@ class GW:
                 json=args,
                 headers=self.http_headers
             ).json()
-        except:
+        except (requests.ConnectionError, requests.Timeout):
             sleep(2)
             return self.api_call(method, args, params)
         if len(result_json['error']):

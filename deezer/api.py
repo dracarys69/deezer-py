@@ -37,7 +37,7 @@ class API:
                 headers=self.http_headers,
                 timeout=30
             ).json()
-        except:
+        except (requests.ConnectionError, requests.Timeout):
             sleep(2)
             return self.api_call(method, args)
         if 'error' in result_json.keys():
