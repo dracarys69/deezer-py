@@ -190,7 +190,7 @@ class Deezer:
                         result.append(WrongGeolocation(self.current_user['country']))
                     else:
                         result.append(DeezerError(json.dumps(response)))
-                if 'media' in data:
+                if 'media' in data and len(data['media']):
                     result.append(data['media'][0]['sources'][0]['url'])
                 else:
                     result.append(None)
