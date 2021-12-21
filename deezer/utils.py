@@ -4,21 +4,15 @@ RELEASE_TYPE = {0:"single", 1:"album", 2:"compile", 3:"ep", 4:"bundle"}
 
 # maps gw-light api user/tracks to standard api
 def map_user_track(track):
-    art_picture = track.get('ART_PICTURE')
-    if not art_picture:
-        for artist in track['ARTISTS']:
-            if artist['ART_ID'] == track['ART_ID']:
-                art_picture = artist['ART_PICTURE']
-                break
-    return {
+    result = {
         'id': track['SNG_ID'],
         'title': track['SNG_TITLE'],
         'link': 'https://www.deezer.com/track/'+str(track['SNG_ID']),
         'duration': track['DURATION'],
         'rank': track['RANK_SNG'],
-        'explicit_lyrics': int(track['EXPLICIT_LYRICS']) > 0,
-        'explicit_content_lyrics': track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_COVER_STATUS'],
-        'explicit_content_cover': track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_LYRICS_STATUS'],
+        'explicit_lyrics': False,
+        'explicit_content_lyrics': False,
+        'explicit_content_cover': False,
         'time_add': track.get('DATE_ADD') or track.get('DATE_FAVORITE'),
         'album': {
                 'id': track['ALB_ID'],
@@ -35,15 +29,31 @@ def map_user_track(track):
                 'id': track['ART_ID'],
                 'name': track['ART_NAME'],
                 'picture': 'https://api.deezer.com/artist/'+str(track['ART_ID'])+'/image',
-                'picture_small': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/56x56-000000-80-0-0.jpg',
-                'picture_medium': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/250x250-000000-80-0-0.jpg',
-                'picture_big': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/500x500-000000-80-0-0.jpg',
-                'picture_xl': 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/1000x1000-000000-80-0-0.jpg',
+                'picture_small': None,
+                'picture_medium': None,
+                'picture_big': None,
+                'picture_xl': None,
                 'tracklist': 'https://api.deezer.com/artist/'+str(track['ART_ID'])+'/top?limit=50',
                 'type': 'artist'
         },
         'type': 'track'
     }
+    if int(track['SNG_ID']) >= 0:
+        art_picture = track.get('ART_PICTURE')
+        if not art_picture:
+            for artist in track['ARTISTS']:
+                if artist['ART_ID'] == track['ART_ID']:
+                    art_picture = artist['ART_PICTURE']
+                    break
+        result['explicit_lyrics'] = int(track['EXPLICIT_LYRICS']) > 0
+        result['explicit_content_lyrics'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_COVER_STATUS']
+        result['explicit_content_cover'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_LYRICS_STATUS']
+
+        result['artist']['picture_small'] = 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/56x56-000000-80-0-0.jpg'
+        result['artist']['picture_medium'] = 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/250x250-000000-80-0-0.jpg'
+        result['artist']['picture_big'] = 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/500x500-000000-80-0-0.jpg'
+        result['artist']['picture_xl'] = 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/1000x1000-000000-80-0-0.jpg'
+    return result
 
 # maps gw-light api user/artists to standard api
 def map_user_artist(artist):
