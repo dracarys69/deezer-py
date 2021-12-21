@@ -163,7 +163,7 @@ class GW:
         })
 
     def get_playlist(self, playlist_id):
-        return self.api_call('playlist.getData', {'playlist_id': playlist_id})
+        return self.get_playlist_page(playlist_id)
 
     def get_playlist_page(self, playlist_id):
         return self.api_call('deezer.pagePlaylist', {
