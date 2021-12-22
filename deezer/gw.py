@@ -75,7 +75,7 @@ class GW:
             sleep(2)
             return self.api_call(method, args, params)
         if len(result_json['error']):
-            if result_json.get('payload', {}).get('FALLBACK', {}):
+            if result_json.get('payload', {}) and result_json['payload'].get('FALLBACK', {}):
                 for key in result_json['payload']['FALLBACK'].keys():
                     args[key] = result_json['payload']['FALLBACK'][key]
                 return self.api_call(method, args, params)
