@@ -75,6 +75,10 @@ class GW:
             sleep(2)
             return self.api_call(method, args, params)
         if len(result_json['error']):
+            if result_json.get('payload', {}).get('FALLBACK', {}):
+                for key in result_json['payload']['FALLBACK'].keys():
+                    args[key] = result_json['payload']['FALLBACK'][key]
+                return self.api_call(method, args, params)
             raise GWAPIError(json.dumps(result_json['error']))
         return result_json['results']
 
@@ -86,7 +90,7 @@ class GW:
         return self.api_call('deezer.getUserData')
 
     def get_user_profile_page(self, user_id, tab, limit=10):
-        return self.api_call('deezer.pageProfile', {'user_id': user_id, 'tab': tab, 'nb': limit})
+        return self.api_call('deezer.pageProfile', {'USER_ID': user_id, 'tab': tab, 'nb': limit})
 
     def get_user_favorite_ids(self, checksum = None, limit = 10000, start = 0):
         return self.api_call('song.getFavoriteIds', {'nb': limit, 'start': start, 'checksum': checksum})
@@ -95,17 +99,17 @@ class GW:
         return self.api_call('deezer.getChildAccounts')
 
     def get_track(self, sng_id):
-        return self.api_call('song.getData', {'sng_id': sng_id})
+        return self.api_call('song.getData', {'SNG_ID': sng_id})
 
     def get_track_page(self, sng_id):
-        return self.api_call('deezer.pageTrack', {'sng_id': sng_id})
+        return self.api_call('deezer.pageTrack', {'SNG_ID': sng_id})
 
     def get_track_lyrics(self, sng_id):
-        return self.api_call('song.getLyrics', {'sng_id': sng_id})
+        return self.api_call('song.getLyrics', {'SNG_ID': sng_id})
 
     def get_tracks(self, sng_ids):
         tracks_array = []
-        body = self.api_call('song.getListData', {'sng_ids': sng_ids})
+        body = self.api_call('song.getListData', {'SNG_IDS': sng_ids})
         errors = 0
         for i in range(len(sng_ids)):
             if sng_ids[i] != 0:
@@ -116,11 +120,11 @@ class GW:
         return tracks_array
 
     def get_album(self, alb_id):
-        return self.api_call('album.getData', {'alb_id': alb_id})
+        return self.api_call('album.getData', {'ALB_ID': alb_id})
 
     def get_album_page(self, alb_id):
         return self.api_call('deezer.pageAlbum', {
-            'alb_id': alb_id,
+            'ALB_ID': alb_id,
             'lang': 'en',
             'header': True,
             'tab': 0
@@ -128,18 +132,18 @@ class GW:
 
     def get_album_tracks(self, alb_id):
         tracks_array = []
-        body = self.api_call('song.getListByAlbum', {'alb_id': alb_id, 'nb': -1})
+        body = self.api_call('song.getListByAlbum', {'ALB_ID': alb_id, 'nb': -1})
         for track in body['data']:
             track['POSITION'] = body['data'].index(track)
             tracks_array.append(track)
         return tracks_array
 
     def get_artist(self, art_id):
-        return self.api_call('artist.getData', {'art_id': art_id})
+        return self.api_call('artist.getData', {'ART_ID': art_id})
 
     def get_artist_page(self, art_id):
         return self.api_call('deezer.pageArtist', {
-            'art_id': art_id,
+            'ART_ID': art_id,
             'lang': 'en',
             'header': True,
             'tab': 0
@@ -147,7 +151,7 @@ class GW:
 
     def get_artist_top_tracks(self, art_id, limit=100):
         tracks_array = []
-        body = self.api_call('artist.getTopTrack', {'art_id': art_id, 'nb': limit})
+        body = self.api_call('artist.getTopTrack', {'ART_ID': art_id, 'nb': limit})
         for track in body['data']:
             track['POSITION'] = body['data'].index(track)
             tracks_array.append(track)
@@ -155,7 +159,7 @@ class GW:
 
     def get_artist_discography(self, art_id, index=0, limit=25):
         return self.api_call('album.getDiscography', {
-            'art_id': art_id,
+            'ART_ID': art_id,
             "discography_mode":"all",
             'nb': limit,
             'nb_songs': 0,
@@ -167,7 +171,7 @@ class GW:
 
     def get_playlist_page(self, playlist_id):
         return self.api_call('deezer.pagePlaylist', {
-            'playlist_id': playlist_id,
+            'PLAYLIST_ID': playlist_id,
             'lang': 'en',
             'header': True,
             'tab': 0
@@ -175,7 +179,7 @@ class GW:
 
     def get_playlist_tracks(self, playlist_id):
         tracks_array = []
-        body = self.api_call('playlist.getSongs', {'playlist_id': playlist_id, 'nb': -1})
+        body = self.api_call('playlist.getSongs', {'PLAYLIST_ID': playlist_id, 'nb': -1})
         for track in body['data']:
             track['POSITION'] = body['data'].index(track)
             tracks_array.append(track)
@@ -197,7 +201,7 @@ class GW:
         for song in songs:
             newSongs.append([song, 0])
         return self.api_call('playlist.update', {
-            'playlist_id': playlist_id,
+            'PLAYLIST_ID': playlist_id,
             'title': title,
             'status': status,
             'description': description,
@@ -209,7 +213,7 @@ class GW:
         for song in songs:
             newSongs.append([song, 0])
         return self.api_call('playlist.addSongs', {
-            'playlist_id': playlist_id,
+            'PLAYLIST_ID': playlist_id,
             'songs': newSongs,
             'offset': offset
         })
@@ -222,7 +226,7 @@ class GW:
         for song in songs:
             newSongs.append([song, 0])
         return self.api_call('playlist.deleteSongs', {
-            'playlist_id': playlist_id,
+            'PLAYLIST_ID': playlist_id,
             'songs': newSongs
         })
 
@@ -230,7 +234,7 @@ class GW:
         return self.remove_songs_from_playlist(playlist_id, [sng_id])
 
     def delete_playlist(self, playlist_id):
-        return self.api_call('playlist.delete', {'playlist_id': playlist_id})
+        return self.api_call('playlist.delete', {'PLAYLIST_ID': playlist_id})
 
     def add_song_to_favorites(self, sng_id):
         return self.api_call('favorite_song.add', {'SNG_ID': sng_id})
@@ -344,6 +348,8 @@ class GW:
         if body:
             if 'LYRICS' in body:
                 body['DATA']['LYRICS'] = body['LYRICS']
+            if 'ISRC' in body:
+                body['DATA']['ALBUM_FALLBACK'] = body['ISRC']
             body = body['DATA']
         else:
             body = self.get_track(sng_id)
