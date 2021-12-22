@@ -54,12 +54,13 @@ class GW:
     def __init__(self, session, headers):
         self.http_headers = headers
         self.session = session
+        self.api_token = self._get_token()
 
     def api_call(self, method, args=None, params=None):
         if args is None: args = {}
         if params is None: params = {}
         p = {'api_version': "1.0",
-             'api_token': 'null' if method == 'deezer.getUserData' else self._get_token(),
+             'api_token': 'null' if method == 'deezer.getUserData' else self.api_token,
              'input': '3',
              'method': method}
         p.update(params)
@@ -75,6 +76,12 @@ class GW:
             sleep(2)
             return self.api_call(method, args, params)
         if len(result_json['error']):
+            if (
+                result_json['error'] == {"GATEWAY_ERROR": "invalid api token"} or
+                result_json['error'] == {"VALID_TOKEN_REQUIRED": "Invalid CSRF token"}
+            ):
+                self.api_token = self._get_token()
+                return self.api_call(method, args, params)
             if result_json.get('payload', {}) and result_json['payload'].get('FALLBACK', {}):
                 for key in result_json['payload']['FALLBACK'].keys():
                     args[key] = result_json['payload']['FALLBACK'][key]
