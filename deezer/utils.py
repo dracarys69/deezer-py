@@ -171,7 +171,7 @@ def map_album(album):
         'record_type': None, # Not provided
         'alternative': None, # Not provided
         'tracklist': f"https://api.deezer.com/album/{album['ALB_ID']}/tracks",
-        'explicit_lyrics': is_explicit(album['EXPLICIT_LYRICS']),
+        'explicit_lyrics': is_explicit(album.get('EXPLICIT_LYRICS')),
         'explicit_content_lyrics': album.get('EXPLICIT_ALBUM_CONTENT', {}).get('EXPLICIT_LYRICS_STATUS'),
         'explicit_content_cover': album.get('EXPLICIT_ALBUM_CONTENT', {}).get('EXPLICIT_COVER_STATUS'),
         'contributors': [],
@@ -186,7 +186,7 @@ def map_album(album):
         'type': album['__TYPE__'],
         'tracks': [], # not provided
         # Extras
-        'rating': album['RANK'],
+        'rating': album.get('RANK'),
         'digital_release_date': album['DIGITAL_RELEASE_DATE'],
         'physical_release_date': album['PHYSICAL_RELEASE_DATE'],
         'original_release_date': album['ORIGINAL_RELEASE_DATE'],
@@ -225,8 +225,8 @@ def map_album(album):
                 'type': "artist",
                 'role': RoleID.get(contributor['ROLE_ID']),
                 # Extras
-                'order': contributor['ARTISTS_SONGS_ORDER'],
-                'rank': contributor['RANK']
+                'order': contributor.get('ARTISTS_SONGS_ORDER'),
+                'rank': contributor.get('RANK')
             })
     return result
 
@@ -400,9 +400,9 @@ def map_track(track):
         result['filesizes']['mp3_128'] = track['FILESIZE_MP3_128']
         result['filesizes']['mp3_256'] = track['FILESIZE_MP3_256']
         result['filesizes']['mp3_320'] = track['FILESIZE_MP3_320']
-        result['filesizes']['mp4_ra1'] = track['FILESIZE_MP4_RA1']
-        result['filesizes']['mp4_ra2'] = track['FILESIZE_MP4_RA2']
-        result['filesizes']['mp4_ra3'] = track['FILESIZE_MP4_RA3']
+        result['filesizes']['mp4_ra1'] = track.get('FILESIZE_MP4_RA1')
+        result['filesizes']['mp4_ra2'] = track.get('FILESIZE_MP4_RA2')
+        result['filesizes']['mp4_ra3'] = track.get('FILESIZE_MP4_RA3')
         result['filesizes']['flac'] = track['FILESIZE_FLAC']
     else:
         result['token'] = track['TOKEN']
