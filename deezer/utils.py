@@ -1,9 +1,43 @@
 import re
 
-RELEASE_TYPE = {0:"single", 1:"album", 2:"compile", 3:"ep", 4:"bundle"}
+class LyricsStatus():
+    """Explicit Content Lyrics"""
 
-# maps gw-light api user/tracks to standard api
+    NOT_EXPLICIT = 0
+    """Not Explicit"""
+
+    EXPLICIT = 1
+    """Explicit"""
+
+    UNKNOWN = 2
+    """Unknown"""
+
+    EDITED = 3
+    """Edited"""
+
+    PARTIALLY_EXPLICIT = 4
+    """Partially Explicit (Album "lyrics" only)"""
+
+    PARTIALLY_UNKNOWN = 5
+    """Partially Unknown (Album "lyrics" only)"""
+
+    NO_ADVICE = 6
+    """No Advice Available"""
+
+    PARTIALLY_NO_ADVICE = 7
+    """Partially No Advice Available (Album "lyrics" only)"""
+
+ReleaseType = {0:"single", 1:"album", 2:"compile", 3:"ep", 4:"bundle"}
+
+# TODO: add missing role ids
+RoleID = {0:"Main", 5:"Featured"}
+
+def is_explicit(explicit_content_lyrics):
+    """get explicit lyrics boolean from explicit_content_lyrics"""
+    return explicit_content_lyrics or LyricsStatus.UNKNOWN in [LyricsStatus.EXPLICIT, LyricsStatus.PARTIALLY_EXPLICIT]
+
 def map_user_track(track):
+    """maps gw-light api user/tracks to standard api"""
     result = {
         'id': track['SNG_ID'],
         'title': track['SNG_TITLE'],
@@ -45,7 +79,7 @@ def map_user_track(track):
                 if artist['ART_ID'] == track['ART_ID']:
                     art_picture = artist['ART_PICTURE']
                     break
-        result['explicit_lyrics'] = int(track['EXPLICIT_LYRICS']) > 0
+        result['explicit_lyrics'] = is_explicit(track['EXPLICIT_LYRICS'])
         result['explicit_content_lyrics'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_COVER_STATUS']
         result['explicit_content_cover'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_LYRICS_STATUS']
 
@@ -55,8 +89,8 @@ def map_user_track(track):
         result['artist']['picture_xl'] = 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/1000x1000-000000-80-0-0.jpg'
     return result
 
-# maps gw-light api user/artists to standard api
 def map_user_artist(artist):
+    """maps gw-light api user/artists to standard api"""
     return {
         'id': artist['ART_ID'],
         'name': artist['ART_NAME'],
@@ -71,8 +105,8 @@ def map_user_artist(artist):
         'type': 'artist'
     }
 
-# maps gw-light api user/albums to standard api
 def map_user_album(album):
+    """maps gw-light api user/albums to standard api"""
     return {
         'id': album['ALB_ID'],
         'title': album['ALB_TITLE'],
@@ -83,7 +117,7 @@ def map_user_album(album):
         'cover_big': 'https://e-cdns-images.dzcdn.net/images/cover/'+album['ALB_PICTURE']+'/500x500-000000-80-0-0.jpg',
         'cover_xl': 'https://e-cdns-images.dzcdn.net/images/cover/'+album['ALB_PICTURE']+'/1000x1000-000000-80-0-0.jpg',
         'tracklist': 'https://api.deezer.com/album/'+str(album['ALB_ID'])+'/tracks',
-        'explicit_lyrics': album['EXPLICIT_ALBUM_CONTENT']['EXPLICIT_LYRICS_STATUS'] > 0,
+        'explicit_lyrics': is_explicit(album['EXPLICIT_ALBUM_CONTENT']['EXPLICIT_LYRICS_STATUS']),
         'artist': {
             'id': album['ART_ID'],
             'name': album['ART_NAME'],
@@ -93,8 +127,8 @@ def map_user_album(album):
         'type': 'album'
     }
 
-# maps gw-light api user/playlists to standard api
 def map_user_playlist(playlist, default_user_name=""):
+    """maps gw-light api user/playlists to standard api"""
     return {
         'id': playlist['PLAYLIST_ID'],
         'title': playlist['TITLE'],
@@ -115,14 +149,93 @@ def map_user_playlist(playlist, default_user_name=""):
         'type': 'playlist'
     }
 
-# maps gw-light api albums to standard api
 def map_album(album):
+    """maps gw-light api albums to standard api"""
+    result = {
+        'id': album['ALB_ID'],
+        'title': album['ALB_TITLE'],
+        'title_short': album['ALB_TITLE'],
+        'link': f"https://www.deezer.com/album/{album['ALB_ID']}",
+        'share': f"https://www.deezer.com/album/{album['ALB_ID']}",
+        'cover': f"https://api.deezer.com/album/{album['ALB_ID']}/image",
+        'cover_small': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/56x56-000000-80-0-0.jpg",
+        'cover_medium': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/250x250-000000-80-0-0.jpg",
+        'cover_big': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/500x500-000000-80-0-0.jpg",
+        'cover_xl': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/1000x1000-000000-80-0-0.jpg",
+        'md5_image': album['ALB_PICTURE'],
+        'genres': {}, # Not provided
+        'label': album.get('LABEL_NAME'),
+        'duration': None, # Not provided
+        'fans': album.get('NB_FAN'),
+        'release_date': album['PHYSICAL_RELEASE_DATE'],
+        'record_type': None, # Not provided
+        'alternative': None, # Not provided
+        'tracklist': f"https://api.deezer.com/album/{album['ALB_ID']}/tracks",
+        'explicit_lyrics': is_explicit(album['EXPLICIT_LYRICS']),
+        'explicit_content_lyrics': album.get('EXPLICIT_ALBUM_CONTENT', {}).get('EXPLICIT_LYRICS_STATUS'),
+        'explicit_content_cover': album.get('EXPLICIT_ALBUM_CONTENT', {}).get('EXPLICIT_COVER_STATUS'),
+        'contributors': [],
+        'artist': {
+            'id': album['ART_ID'],
+            'name': album['ART_NAME'],
+            'link': f"https://www.deezer.com/artist/{album['ART_ID']}",
+            'type': "artist",
+            # Extras
+            'rank': album.get('RANK_ART')
+        },
+        'type': album['__TYPE__'],
+        'tracks': [], # not provided
+        # Extras
+        'rating': album['RANK'],
+        'digital_release_date': album['DIGITAL_RELEASE_DATE'],
+        'physical_release_date': album['PHYSICAL_RELEASE_DATE'],
+        'original_release_date': album['ORIGINAL_RELEASE_DATE'],
+    }
+    result['title_version'] = album.get('VERSION', "").strip()
+    if (result['title_version'] != "" and result['title_version'] in result['title_short']):
+        result['title_short'] = result['title_short'].replace(result['title_version'], "").strip()
+    result['title'] = f"{result['title_short']} {result['title_version']}".strip()
+    result['upc'] = album.get('UPC')
+    result['genre_id'] = album.get('GENRE_ID')
+    result['nb_tracks'] = album.get('NUMBER_TRACK')
+    result['available'] = album.get('AVAILABLE')
+    result['album_contributors'] = album.get('ALB_CONTRIBUTORS')
+    result['nb_disk'] = album.get('NUMBER_DISK')
+    result['copyright'] = album.get('COPYRIGHT')
+    if "ARTISTS" in album:
+        for contributor in album['ARTISTS']:
+            if contributor['ART_ID'] == result['artist']['id']:
+                result['artist']['picture_small'] = f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/56x56-000000-80-0-0.jpg"
+                result['artist']['picture_medium'] = f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/250x250-000000-80-0-0.jpg"
+                result['artist']['picture_big'] = f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/500x500-000000-80-0-0.jpg"
+                result['artist']['picture_xl'] = f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/1000x1000-000000-80-0-0.jpg"
+                result['artist']['md5_image'] = contributor['ART_PICTURE']
+            result['contributors'].append({
+                'id': contributor['ART_ID'],
+                'name': contributor['ART_NAME'],
+                'link': f"https://www.deezer.com/artist/{contributor['ART_ID']}",
+                'share': f"https://www.deezer.com/artist/{contributor['ART_ID']}",
+                'picture': f"https://www.deezer.com/artist/{contributor['ART_ID']}/image",
+                'picture_small': f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/56x56-000000-80-0-0.jpg",
+                'picture_medium': f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/250x250-000000-80-0-0.jpg",
+                'picture_big': f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/500x500-000000-80-0-0.jpg",
+                'picture_xl': f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/1000x1000-000000-80-0-0.jpg",
+                'md5_image': contributor['ART_PICTURE'],
+                'tracklist': f"https://api.deezer.com/artist/{contributor['ART_ID']}/top?limit=50",
+                'type': "artist",
+                'role': RoleID.get(contributor['ROLE_ID']),
+                # Extras
+                'order': contributor['ARTISTS_SONGS_ORDER'],
+                'rank': contributor['RANK']
+            })
+    return result
+
+def map_artist_album(album):
+    """maps gw-light api artist/albums to standard api"""
     return {
         'id': album['ALB_ID'],
         'title': album['ALB_TITLE'],
-        'upc': "", # TODO: Needs to be checked
         'link': f"https://www.deezer.com/album/{album['ALB_ID']}",
-        'share': "", # TODO: Needs to be checked
         'cover': f"https://api.deezer.com/album/{album['ALB_ID']}/image",
         'cover_small': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/56x56-000000-80-0-0.jpg",
         'cover_medium': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/250x250-000000-80-0-0.jpg",
@@ -130,53 +243,28 @@ def map_album(album):
         'cover_xl': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/1000x1000-000000-80-0-0.jpg",
         'md5_image': album['ALB_PICTURE'],
         'genre_id': album['GENRE_ID'],
-        'genres': [], # TODO: Needs to be checked
-        'label': "", # TODO: Needs to be checked
-        'nb_tracks': album['NUMBER_TRACK'],
-        'duration': 0, # TODO: Needs to be checked
-        'fans': album['RANK'],
-        'rating': 0, # TODO: Needs to be checked
+        'fans': None, # Not provided
         'release_date': album['PHYSICAL_RELEASE_DATE'],
-        'record_type': RELEASE_TYPE.get(int(album['TYPE']), "unknown"),
-        'available': True, # TODO: Needs to be checked
-        'alternative': None, # TODO: Needs to be checked
+        'record_type': ReleaseType.get(int(album['TYPE']), "unknown"),
         'tracklist': f"https://api.deezer.com/album/{album['ALB_ID']}/tracks",
-        'explicit_lyrics': int(album['EXPLICIT_LYRICS']) > 0,
-        'explicit_content_lyrics': 2, # TODO: Needs to be checked
-        'explicit_content_cover': 2, # TODO: Needs to be checked
-        'contributors': [], # TODO: Needs to be checked
-        'artist': None, # TODO: Needs to be checked
-        'tracks': [], # TODO: Needs to be checked
-        'type': album['__TYPE__'],
-        # Extras
-        'nb_disk': album['NUMBER_DISK']
-    }
-
-# maps gw-light api artist/albums to standard api
-def map_artist_album(album):
-    return {
-        'id': album['ALB_ID'],
-        'title': album['ALB_TITLE'],
-        'link': f"https://www.deezer.com/album/{album['ALB_ID']}",
-        'cover': f"https://api.deezer.com/album/{album['ALB_ID']}/image",
-        'cover_small': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/56x56-000000-80-0-0.jpg",
-        'cover_medium': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/250x250-000000-80-0-0.jpg",
-        'cover_big': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/500x500-000000-80-0-0.jpg",
-        'cover_xl': f"https://cdns-images.dzcdn.net/images/cover/{album['ALB_PICTURE']}/1000x1000-000000-80-0-0.jpg",
-        'genre_id': album['GENRE_ID'],
-        'fans': album['RANK'],
-        'release_date': album['PHYSICAL_RELEASE_DATE'],
-        'record_type': RELEASE_TYPE.get(int(album['TYPE']), "unknown"),
-        'tracklist': f"https://api.deezer.com/album/{album['ALB_ID']}/tracks",
-        'explicit_lyrics': int(album['EXPLICIT_LYRICS']) > 0,
+        'explicit_lyrics': is_explicit(album['EXPLICIT_LYRICS']),
         'type': album['__TYPE__'],
         # Extras
         'nb_tracks': album['NUMBER_TRACK'],
-        'nb_disk': album['NUMBER_DISK']
+        'nb_disk': album['NUMBER_DISK'],
+        'copyright': album['COPYRIGHT'],
+        'rank': album['RANK'],
+        'digital_release_date': album['DIGITAL_RELEASE_DATE'],
+        'original_release_date': album['ORIGINAL_RELEASE_DATE'],
+        'physical_release_date': album['PHYSICAL_RELEASE_DATE'],
+        'is_official': album['ARTISTS_ALBUMS_IS_OFFICIAL'],
+        'explicit_content_cover': album['EXPLICIT_ALBUM_CONTENT']['EXPLICIT_LYRICS_STATUS'],
+        'explicit_content_lyrics': album['EXPLICIT_ALBUM_CONTENT']['EXPLICIT_COVER_STATUS'],
+        'artist_role': RoleID.get(album['ROLE_ID'])
     }
 
-# maps gw-light api playlists to standard api
 def map_playlist(playlist):
+    """maps gw-light api playlists to standard api"""
     return {
             'id': playlist['PLAYLIST_ID'],
             'title': playlist['TITLE'],
@@ -194,6 +282,8 @@ def map_playlist(playlist):
             'picture_medium': "https://cdns-images.dzcdn.net/images/"+playlist['PICTURE_TYPE']+"/"+playlist['PLAYLIST_PICTURE']+"/250x250-000000-80-0-0.jpg",
             'picture_big': "https://cdns-images.dzcdn.net/images/"+playlist['PICTURE_TYPE']+"/"+playlist['PLAYLIST_PICTURE']+"/500x500-000000-80-0-0.jpg",
             'picture_xl': "https://cdns-images.dzcdn.net/images/"+playlist['PICTURE_TYPE']+"/"+playlist['PLAYLIST_PICTURE']+"/1000x1000-000000-80-0-0.jpg",
+            'md5_image': playlist['PLAYLIST_PICTURE'],
+            'picture_type': playlist['PICTURE_TYPE'],
             'checksum': playlist['CHECKSUM'],
             'tracklist': "https://api.deezer.com/playlist/"+playlist['PLAYLIST_ID']+"/tracks",
             'creation_date': playlist['DATE_ADD'],
@@ -206,8 +296,122 @@ def map_playlist(playlist):
             'type': "playlist"
         }
 
-# Cleanup terms that can hurt search results
+def map_track(track):
+    """maps gw-light api tracks to standard api"""
+    result = {
+        'id': track['SNG_ID'],
+        'readable': True, # not provided
+        'title': track['SNG_TITLE'],
+        'title_short': track['SNG_TITLE'],
+        'isrc': track['ISRC'],
+        'link': f"https://www.deezer.com/track/{track['SNG_ID']}",
+        'share': f"https://www.deezer.com/track/{track['SNG_ID']}",
+        'duration': track['DURATION'],
+        'bpm': None, # not provided
+        'available_countries': [], # not provided
+        'contributors': [],
+        'md5_image': track['ALB_PICTURE'],
+        'artist': {
+            'id': track['ART_ID'],
+            'name': track['ART_NAME'],
+            'link': f"https://www.deezer.com/artist/{track['ART_ID']}",
+            'share': f"https://www.deezer.com/artist/{track['ART_ID']}",
+            'picture': f"https://www.deezer.com/artist/{track['ART_ID']}/image",
+            'radio': None, # not provided
+            'tracklist': f"https://api.deezer.com/artist/{track['ART_ID']}/top?limit=50",
+            'type': "artist"
+        },
+        'album': {
+            'id': track['ALB_ID'],
+            'title': track['ALB_TITLE'],
+            'link': f"https://www.deezer.com/album/{track['ALB_ID']}",
+            'cover': f"https://api.deezer.com/album/{track['ALB_ID']}/image",
+            'cover_small': f"https://e-cdns-images.dzcdn.net/images/cover/{track['ALB_PICTURE']}/56x56-000000-80-0-0.jpg",
+            'cover_medium': f"https://e-cdns-images.dzcdn.net/images/cover/{track['ALB_PICTURE']}/250x250-000000-80-0-0.jpg",
+            'cover_big': f"https://e-cdns-images.dzcdn.net/images/cover/{track['ALB_PICTURE']}/500x500-000000-80-0-0.jpg",
+            'cover_xl': f"https://e-cdns-images.dzcdn.net/images/cover/{track['ALB_PICTURE']}/1000x1000-000000-80-0-0.jpg",
+            'md5_image': track['ALB_PICTURE'],
+            'release_date': None, # not provided
+            'tracklist': f"https://api.deezer.com/album/{track['ALB_ID']}/tracks",
+            'type': "album"
+        },
+        'type': "track",
+        # Extras
+        'md5_origin': track['MD5_ORIGIN'],
+        'filesizes': {
+            'default': track['FILESIZE']
+        },
+        'media_version': track['MEDIA_VERSION'],
+        'track_token': track['TRACK_TOKEN'],
+        'track_token_expire': track['TRACK_TOKEN_EXPIRE']
+      }
+    if int(track['SNG_ID']) > 0:
+        result['title_version'] = track.get('VERSION').strip()
+        if result['title_version'] != "" and result['title_version'] in result['title_short']:
+            result['title_short'] = result['title_short'].replace(result['title_version'], "").strip()
+        result['title'] = f"{result['title_short']} {result['title_version']}".strip()
+        result['track_position'] = track['TRACK_NUMBER']
+        result['disk_number'] = track['DISK_NUMBER']
+        result['rank'] = track.get('RANK') or track.get('RANK_SNG')
+        result['release_date'] = track['PHYSICAL_RELEASE_DATE']
+        result['explicit_lyrics'] = is_explicit(track['EXPLICIT_LYRICS'])
+        result['explicit_content_lyrics'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_LYRICS_STATUS']
+        result['explicit_content_cover'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_COVER_STATUS']
+        result['preview'] = track['MEDIA'][0]['HREF']
+        result['gain'] = track['GAIN']
+        if 'ARTISTS' in track:
+            for contributor in track['ARTISTS']:
+                if contributor['ART_ID'] == result['artist']['id']:
+                    result['artist']['picture_small'] = f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/56x56-000000-80-0-0.jpg"
+                    result['artist']['picture_medium'] = f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/250x250-000000-80-0-0.jpg"
+                    result['artist']['picture_big'] = f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/500x500-000000-80-0-0.jpg"
+                    result['artist']['picture_xl'] = f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/1000x1000-000000-80-0-0.jpg"
+                    result['artist']['md5_image'] = contributor['ART_PICTURE']
+                result['contributors'].append({
+                    'id': contributor['ART_ID'],
+                    'name': contributor['ART_NAME'],
+                    'link': f"https://www.deezer.com/artist/{contributor['ART_ID']}",
+                    'share': f"https://www.deezer.com/artist/{contributor['ART_ID']}",
+                    'picture': f"https://www.deezer.com/artist/{contributor['ART_ID']}/image",
+                    'picture_small': f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/56x56-000000-80-0-0.jpg",
+                    'picture_medium': f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/250x250-000000-80-0-0.jpg",
+                    'picture_big': f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/500x500-000000-80-0-0.jpg",
+                    'picture_xl': f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/1000x1000-000000-80-0-0.jpg",
+                    'md5_image': contributor['ART_PICTURE'],
+                    'tracklist': f"https://api.deezer.com/artist/{contributor['ART_ID']}/top?limit=50",
+                    'type': "artist",
+                    'role': RoleID[contributor['ROLE_ID']],
+                    # Extras
+                    'order': contributor['ARTISTS_SONGS_ORDER'],
+                    'rank': contributor['RANK']
+                })
+        # Extras
+        result['lyrics_id'] = track['LYRICS_ID']
+        result['physical_release_date'] = track['PHYSICAL_RELEASE_DATE']
+        result['song_contributors'] = track['SNG_CONTRIBUTORS']
+        if 'FALLBACK' in track: result['fallback_id'] = track.get('FALLBACK').get('SNG_ID')
+        result['digital_release_date'] = track.get('DIGITAL_RELEASE_DATE')
+        result['genre_id'] = track.get('GENRE_ID')
+        result['copyright'] = track.get('COPYRIGHT')
+        result['lyrics'] = track.get('LYRICS')
+        result['alternative_albums'] = track.get('ALBUM_FALLBACK')
+        result['filesizes']['aac_64'] = track['FILESIZE_AAC_64']
+        result['filesizes']['mp3_64'] = track['FILESIZE_MP3_64']
+        result['filesizes']['mp3_128'] = track['FILESIZE_MP3_128']
+        result['filesizes']['mp3_256'] = track['FILESIZE_MP3_256']
+        result['filesizes']['mp3_320'] = track['FILESIZE_MP3_320']
+        result['filesizes']['mp4_ra1'] = track['FILESIZE_MP4_RA1']
+        result['filesizes']['mp4_ra2'] = track['FILESIZE_MP4_RA2']
+        result['filesizes']['mp4_ra3'] = track['FILESIZE_MP4_RA3']
+        result['filesizes']['flac'] = track['FILESIZE_FLAC']
+    else:
+        result['token'] = track['TOKEN']
+        result['user_id'] = track['USER_ID']
+        result['filesizes']['mp3_misc'] = track['FILESIZE_MP3_MISC']
+    return result
+
 def clean_search_query(term):
+    """Cleanup terms that can hurt search results"""
     term = str(term)
     term = re.sub(r' feat[\.]? ', " ", term)
     term = re.sub(r' ft[\.]? ', " ", term)
