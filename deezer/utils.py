@@ -30,7 +30,7 @@ class LyricsStatus():
 ReleaseType = {0:"single", 1:"album", 2:"compile", 3:"ep", 4:"bundle"}
 
 # TODO: add missing role ids
-RoleID = {0:"Main", 5:"Featured"}
+RoleID = {"0":"Main", "5":"Featured"}
 
 def is_explicit(explicit_content_lyrics):
     """get explicit lyrics boolean from explicit_content_lyrics"""
@@ -200,7 +200,7 @@ def map_album(album):
     result['nb_tracks'] = album.get('NUMBER_TRACK')
     result['available'] = album.get('AVAILABLE')
     result['album_contributors'] = album.get('ALB_CONTRIBUTORS')
-    result['nb_disk'] = album.get('NUMBER_DISK')
+    if album.get('NUMBER_DISK'): result['nb_disk'] = album['NUMBER_DISK']
     result['copyright'] = album.get('COPYRIGHT')
     if "ARTISTS" in album:
         for contributor in album['ARTISTS']:
@@ -390,11 +390,11 @@ def map_track(track):
         result['physical_release_date'] = track['PHYSICAL_RELEASE_DATE']
         result['song_contributors'] = track['SNG_CONTRIBUTORS']
         if 'FALLBACK' in track: result['fallback_id'] = track.get('FALLBACK').get('SNG_ID')
-        result['digital_release_date'] = track.get('DIGITAL_RELEASE_DATE')
-        result['genre_id'] = track.get('GENRE_ID')
-        result['copyright'] = track.get('COPYRIGHT')
-        result['lyrics'] = track.get('LYRICS')
-        result['alternative_albums'] = track.get('ALBUM_FALLBACK')
+        if 'DIGITAL_RELEASE_DATE' in track: result['digital_release_date'] = track['DIGITAL_RELEASE_DATE']
+        if 'GENRE_ID' in track: result['genre_id'] = track['GENRE_ID']
+        if 'COPYRIGHT' in track: result['copyright'] = track['COPYRIGHT']
+        if 'LYRICS' in track: result['lyrics'] = track['LYRICS']
+        if 'ALBUM_FALLBACK' in track: result['alternative_albums'] = track['ALBUM_FALLBACK']
         result['filesizes']['aac_64'] = track['FILESIZE_AAC_64']
         result['filesizes']['mp3_64'] = track['FILESIZE_MP3_64']
         result['filesizes']['mp3_128'] = track['FILESIZE_MP3_128']
