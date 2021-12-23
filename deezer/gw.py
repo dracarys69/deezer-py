@@ -54,11 +54,12 @@ class GW:
     def __init__(self, session, headers):
         self.http_headers = headers
         self.session = session
-        self.api_token = self._get_token()
+        self.api_token = None
 
     def api_call(self, method, args=None, params=None):
         if args is None: args = {}
         if params is None: params = {}
+        if not self.api_token and method != 'deezer.getUserData': self.api_token = self._get_token()
         p = {'api_version': "1.0",
              'api_token': 'null' if method == 'deezer.getUserData' else self.api_token,
              'input': '3',
@@ -87,6 +88,7 @@ class GW:
                     args[key] = result_json['payload']['FALLBACK'][key]
                 return self.api_call(method, args, params)
             raise GWAPIError(json.dumps(result_json['error']))
+        if not self.api_token and method == 'deezer.getUserData': self.api_token = result_json['results']['checkForm']
         return result_json['results']
 
     def _get_token(self):
