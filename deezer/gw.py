@@ -372,6 +372,7 @@ class GW:
     def get_my_favorite_tracks(self, limit=25):
         ids_raw = self.get_user_favorite_ids(limit=limit)
         ids = [ x['SNG_ID'] for x in ids_raw['data'] ]
+        if len(ids) == 0: return []
         data = self.get_tracks(ids)
         result = []
         for (i, track) in enumerate(data):
