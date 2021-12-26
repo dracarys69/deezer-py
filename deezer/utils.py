@@ -350,15 +350,15 @@ def map_track(track):
         if result['title_version'] != "" and result['title_version'] in result['title_short']:
             result['title_short'] = result['title_short'].replace(result['title_version'], "").strip()
         result['title'] = f"{result['title_short']} {result['title_version']}".strip()
-        result['track_position'] = track['TRACK_NUMBER']
-        result['disk_number'] = track['DISK_NUMBER']
+        result['track_position'] = track.get('TRACK_NUMBER', 0)
+        result['disk_number'] = track.get('DISK_NUMBER', 0)
         result['rank'] = track.get('RANK') or track.get('RANK_SNG')
-        result['release_date'] = track['PHYSICAL_RELEASE_DATE']
+        result['release_date'] = track.get('PHYSICAL_RELEASE_DATE')
         result['explicit_lyrics'] = is_explicit(track['EXPLICIT_LYRICS'])
-        result['explicit_content_lyrics'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_LYRICS_STATUS']
-        result['explicit_content_cover'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_COVER_STATUS']
+        result['explicit_content_lyrics'] = track.get('EXPLICIT_TRACK_CONTENT', {}).get('EXPLICIT_LYRICS_STATUS')
+        result['explicit_content_cover'] = track.get('EXPLICIT_TRACK_CONTENT', {}).get('EXPLICIT_COVER_STATUS')
         result['preview'] = track['MEDIA'][0]['HREF']
-        result['gain'] = track['GAIN']
+        result['gain'] = track.get('GAIN')
         if 'ARTISTS' in track:
             for contributor in track['ARTISTS']:
                 if contributor['ART_ID'] == result['artist']['id']:
