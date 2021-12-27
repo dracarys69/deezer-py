@@ -80,8 +80,8 @@ def map_user_track(track):
                     art_picture = artist['ART_PICTURE']
                     break
         result['explicit_lyrics'] = is_explicit(track['EXPLICIT_LYRICS'])
-        result['explicit_content_lyrics'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_COVER_STATUS']
-        result['explicit_content_cover'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_LYRICS_STATUS']
+        result['explicit_content_lyrics'] = track.get('EXPLICIT_TRACK_CONTENT', {}).get('EXPLICIT_COVER_STATUS')
+        result['explicit_content_cover'] = track.get('EXPLICIT_TRACK_CONTENT', {}).get('EXPLICIT_LYRICS_STATUS')
 
         result['artist']['picture_small'] = 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/56x56-000000-80-0-0.jpg'
         result['artist']['picture_medium'] = 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/250x250-000000-80-0-0.jpg'
@@ -354,7 +354,7 @@ def map_track(track):
         result['disk_number'] = track['DISK_NUMBER']
         result['rank'] = track.get('RANK') or track.get('RANK_SNG')
         result['release_date'] = track['PHYSICAL_RELEASE_DATE']
-        result['explicit_lyrics'] = is_explicit(track['EXPLICIT_LYRICS'])
+        result['explicit_lyrics'] = is_explicit(track.get('EXPLICIT_LYRICS'))
         result['explicit_content_lyrics'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_LYRICS_STATUS']
         result['explicit_content_cover'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_COVER_STATUS']
         result['preview'] = track['MEDIA'][0]['HREF']
