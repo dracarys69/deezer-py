@@ -1,5 +1,9 @@
 import re
 
+class DefaultDict(dict):
+    def __getitem__(self, key):
+        return self.get(key, None)
+
 class LyricsStatus():
     """Explicit Content Lyrics"""
 
@@ -38,6 +42,7 @@ def is_explicit(explicit_content_lyrics):
 
 def map_user_track(track):
     """maps gw-light api user/tracks to standard api"""
+    track = DefaultDict(track)
     result = {
         'id': track['SNG_ID'],
         'title': track['SNG_TITLE'],
@@ -75,13 +80,14 @@ def map_user_track(track):
     if int(track['SNG_ID']) >= 0:
         art_picture = track.get('ART_PICTURE')
         if not art_picture:
-            for artist in track['ARTISTS']:
+            for artist in track.get('ARTISTS', []):
+                artist = DefaultDict(artist)
                 if artist['ART_ID'] == track['ART_ID']:
                     art_picture = artist['ART_PICTURE']
                     break
         result['explicit_lyrics'] = is_explicit(track['EXPLICIT_LYRICS'])
-        result['explicit_content_lyrics'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_COVER_STATUS']
-        result['explicit_content_cover'] = track['EXPLICIT_TRACK_CONTENT']['EXPLICIT_LYRICS_STATUS']
+        result['explicit_content_lyrics'] = track.get('EXPLICIT_TRACK_CONTENT', {}).get('EXPLICIT_COVER_STATUS')
+        result['explicit_content_cover'] = track.get('EXPLICIT_TRACK_CONTENT', {}).get('EXPLICIT_LYRICS_STATUS')
 
         result['artist']['picture_small'] = 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/56x56-000000-80-0-0.jpg'
         result['artist']['picture_medium'] = 'https://e-cdns-images.dzcdn.net/images/artist/'+str(art_picture)+'/250x250-000000-80-0-0.jpg'
@@ -91,6 +97,7 @@ def map_user_track(track):
 
 def map_user_artist(artist):
     """maps gw-light api user/artists to standard api"""
+    artist = DefaultDict(artist)
     return {
         'id': artist['ART_ID'],
         'name': artist['ART_NAME'],
@@ -107,6 +114,7 @@ def map_user_artist(artist):
 
 def map_user_album(album):
     """maps gw-light api user/albums to standard api"""
+    album = DefaultDict(album)
     return {
         'id': album['ALB_ID'],
         'title': album['ALB_TITLE'],
@@ -129,6 +137,7 @@ def map_user_album(album):
 
 def map_user_playlist(playlist, default_user_name=""):
     """maps gw-light api user/playlists to standard api"""
+    playlist = DefaultDict(playlist)
     return {
         'id': playlist['PLAYLIST_ID'],
         'title': playlist['TITLE'],
@@ -151,6 +160,7 @@ def map_user_playlist(playlist, default_user_name=""):
 
 def map_album(album):
     """maps gw-light api albums to standard api"""
+    album = DefaultDict(album)
     result = {
         'id': album['ALB_ID'],
         'title': album['ALB_TITLE'],
@@ -232,6 +242,7 @@ def map_album(album):
 
 def map_artist_album(album):
     """maps gw-light api artist/albums to standard api"""
+    album = DefaultDict(album)
     return {
         'id': album['ALB_ID'],
         'title': album['ALB_TITLE'],
@@ -265,6 +276,7 @@ def map_artist_album(album):
 
 def map_playlist(playlist):
     """maps gw-light api playlists to standard api"""
+    playlist = DefaultDict(playlist)
     return {
             'id': playlist['PLAYLIST_ID'],
             'title': playlist['TITLE'],
@@ -298,6 +310,7 @@ def map_playlist(playlist):
 
 def map_track(track):
     """maps gw-light api tracks to standard api"""
+    track = DefaultDict(track)
     result = {
         'id': track['SNG_ID'],
         'readable': True, # not provided
@@ -361,6 +374,7 @@ def map_track(track):
         result['gain'] = track.get('GAIN')
         if 'ARTISTS' in track:
             for contributor in track['ARTISTS']:
+                contributor = DefaultDict(contributor)
                 if contributor['ART_ID'] == result['artist']['id']:
                     result['artist']['picture_small'] = f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/56x56-000000-80-0-0.jpg"
                     result['artist']['picture_medium'] = f"https://e-cdns-images.dzcdn.net/images/artist/{contributor['ART_PICTURE']}/250x250-000000-80-0-0.jpg"
