@@ -359,7 +359,7 @@ def map_track(track):
         'track_token_expire': track['TRACK_TOKEN_EXPIRE']
       }
     if int(track['SNG_ID']) > 0:
-        result['title_version'] = track.get('VERSION').strip()
+        result['title_version'] = track.get('VERSION', "").strip()
         if result['title_version'] != "" and result['title_version'] in result['title_short']:
             result['title_short'] = result['title_short'].replace(result['title_version'], "").strip()
         result['title'] = f"{result['title_short']} {result['title_version']}".strip()
