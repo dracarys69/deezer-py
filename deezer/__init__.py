@@ -5,7 +5,7 @@ from deezer.gw import GW
 from deezer.api import API
 from deezer.errors import DeezerError, WrongLicense, WrongGeolocation
 
-__version__ = "1.3.4"
+__version__ = "1.3.5"
 
 class TrackFormats():
     """Number associtation for formats"""
