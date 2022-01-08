@@ -123,7 +123,7 @@ class Deezer:
                         'can_stream_hq': user_data["USER"]["OPTIONS"]["web_hq"] or user_data["USER"]["OPTIONS"]["mobile_hq"],
                         'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"],
                         'country': user_data["USER"]["OPTIONS"]["license_country"],
-                        'language': user_data["USER"]["SETTING"]["global"]["language"],
+                        'language': user_data["USER"]["SETTING"]["global"].get("language", ""),
                         'loved_tracks': child.get("LOVEDTRACKS_ID")
                     })
         else:
@@ -135,7 +135,7 @@ class Deezer:
                 'can_stream_hq': user_data["USER"]["OPTIONS"]["web_hq"] or user_data["USER"]["OPTIONS"]["mobile_hq"],
                 'can_stream_lossless': user_data["USER"]["OPTIONS"]["web_lossless"] or user_data["USER"]["OPTIONS"]["mobile_lossless"],
                 'country': user_data["USER"]["OPTIONS"]["license_country"],
-                'language': user_data["USER"]["SETTING"]["global"]["language"],
+                'language': user_data["USER"]["SETTING"]["global"].get("language", ""),
                 'loved_tracks': user_data["USER"].get("LOVEDTRACKS_ID")
             })
 
@@ -143,7 +143,7 @@ class Deezer:
         if len(self.childs)-1 < child_n: child_n = 0
         self.current_user = self.childs[child_n]
         self.selected_account = child_n
-        self.http_headers["Accept-Language"] = re.sub(r"[^0-9A-Za-z *,-.;=]", "", self.current_user['language'])
+        self.http_headers["Accept-Language"] = re.sub(r"[^0-9A-Za-z *,-.;=]", "", str(self.current_user['language']))
 
         return (self.current_user, self.selected_account)
 
