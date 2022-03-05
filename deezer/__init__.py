@@ -143,6 +143,11 @@ class Deezer:
         if len(self.childs)-1 < child_n: child_n = 0
         self.current_user = self.childs[child_n]
         self.selected_account = child_n
+        lang = re.sub(r"[^0-9A-Za-z *,-.;=]", "", str(self.current_user['language']))
+        if lang[2:1] == '-':
+            lang = lang[0:5]
+        else:
+            lang = lang[0:2]
         self.http_headers["Accept-Language"] = re.sub(r"[^0-9A-Za-z *,-.;=]", "", str(self.current_user['language']))
 
         return (self.current_user, self.selected_account)
