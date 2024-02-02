@@ -6,7 +6,7 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 setup(
-    name="deezer-py",
+    name="deezer2",
     version="1.3.7",
     description="A wrapper for all Deezer's APIs",
     long_description=README,
